@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:real_estate_admin/Model/Project.dart';
 import 'package:real_estate_admin/Modules/Project/project_form.dart';
 import 'package:real_estate_admin/Modules/Project/property_form.dart';
+import 'package:real_estate_admin/Modules/Project/property_list.dart';
 import 'package:real_estate_admin/Modules/Project/property_view.dart';
 import 'package:real_estate_admin/auth_gate.dart';
 import 'package:real_estate_admin/helper.dart';
@@ -22,25 +23,23 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: AuthGate(),
-      // home: FormTester(
-      //     child: PropertyForm(
-      //   project: Project(name: "name", type: "type", location: "location"),
-      // )),
-    );
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          // This is the theme of your application.
+          //
+          // Try running your application with "flutter run". You'll see the
+          // application has a blue toolbar. Then, without quitting the app, try
+          // changing the primarySwatch below to Colors.green and then invoke
+          // "hot reload" (press "r" in the console where you ran "flutter run",
+          // or simply save your changes to "hot reload" in a Flutter IDE).
+          // Notice that the counter didn't reset back to zero; the application
+          // is not restarted.
+          primarySwatch: Colors.blue,
+        ),
+        // home: PropertyView(),
+        home: FormTester(
+          child: PropertyView(),
+        ));
   }
 }
 
