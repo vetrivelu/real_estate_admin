@@ -13,6 +13,23 @@ class Project {
     this.coverPhoto,
   });
 
+  List<String> get search {
+    List<String> returns = [];
+    returns.addAll(makeSearchstring(name));
+    returns.addAll(makeSearchstring(location));
+    returns.addAll(makeSearchstring(type));
+    return returns;
+  }
+
+  List<String> makeSearchstring(String string) {
+    List<String> list = [];
+    for (int i = 1; i < string.length; i++) {
+      list.add(string.substring(0, i).toLowerCase());
+    }
+    list.add(string.toLowerCase());
+    return list;
+  }
+
   toJson() {
     return {
       "name": name,
@@ -20,6 +37,7 @@ class Project {
       "location": location,
       "docId": docId,
       "coverPhoto": coverPhoto,
+      "search": search,
     };
   }
 

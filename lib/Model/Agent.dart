@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../Providers/session.dart';
+
 class Agent {
   String firstName;
   String? lastName;
@@ -73,10 +75,37 @@ class Agent {
         "bankName": bankName,
         "branch": branch,
         "ifscCode": ifscCode,
+        "isAdmin": isAdmin,
+        "isStaff": isStaff,
+        "panCardNumber": panCardNumber,
+        "docId": docId,
+        "agentReference": agentReference,
+        "approvedStaffReference": approvedStaffReference,
       };
 
   static Agent fromSnapshot(DocumentSnapshot snapshot) {
     var data = snapshot.data() as Map<String, dynamic>;
-    return Agent(docId: snapshot.id, phoneNumber: data["phoneNumber"], firstName: data["firstName"]);
+    return Agent(
+      docId: snapshot.id,
+      firstName: data["firstName"],
+      lastName: data["lastName"],
+      phoneNumber: data["phoneNumber"],
+      addressLine1: data["addressLine1"],
+      addressLine2: data["addressLine2"],
+      street: data["street"],
+      state: data["state"],
+      country: data["country"],
+      pincode: data["pincode"],
+      accountHolderName: data["accountHolderName"],
+      accountNumber: data["accountNumber"],
+      bankName: data["bankName"],
+      branch: data["branch"],
+      ifscCode: data["ifscCode"],
+      isAdmin: data["isAdmin"],
+      isStaff: data["isStaff"],
+      panCardNumber: data["panCardNumber"],
+      agentReference: data["agentReference"],
+      approvedStaffReference: data["approvedStaffReference"],
+    );
   }
 }

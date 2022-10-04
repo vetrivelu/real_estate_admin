@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import '../../Model/Lead.dart';
 import '../../Model/Property.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 
@@ -26,6 +27,8 @@ class PropertyViewModel extends ChangeNotifier {
   List<dynamic> photos = [];
   List<dynamic> deletedPhotos = [];
   String? coverPhoto;
+  bool isSold = false;
+  List<Lead> leads = [];
 
   Uint8List? coverPhototData;
   List<Uint8List> photosData = [];
@@ -83,7 +86,8 @@ class PropertyViewModel extends ChangeNotifier {
         agentComission: agentComission,
         superAgentComission: superAgentComission,
         staffComission: staffComission,
-        leads: [],
+        leads: leads,
+        isSold: isSold,
       );
 
   factory PropertyViewModel.fromProperty(Property property) {
@@ -103,6 +107,8 @@ class PropertyViewModel extends ChangeNotifier {
     propertyViewModel.agentComission = property.agentComission ?? Commission();
     propertyViewModel.superAgentComission = property.superAgentComission ?? Commission();
     propertyViewModel.staffComission = property.staffComission ?? Commission();
+    propertyViewModel.isSold = property.isSold;
+    propertyViewModel.leads = property.leads;
     return propertyViewModel;
   }
 }

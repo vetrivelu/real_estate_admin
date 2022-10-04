@@ -1,7 +1,5 @@
 // ignore: file_names
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:real_estate_admin/Modules/Project/propertyController.dart';
-import 'package:real_estate_admin/Modules/Project/property_form_data.dart';
 
 import 'Lead.dart';
 import 'Project.dart';
@@ -34,6 +32,7 @@ class Property {
   Commission? agentComission;
   Commission? superAgentComission;
   Commission? staffComission;
+  bool isSold;
 
   Property({
     required this.title,
@@ -54,6 +53,7 @@ class Property {
     this.staffComission,
     this.parentProject,
     required this.leads,
+    required this.isSold,
   });
 
   Map<String, dynamic> toJson() => {
@@ -74,7 +74,8 @@ class Property {
         "agentComission": agentComission?.toJson(),
         "superAgentComission": superAgentComission?.toJson(),
         "staffComission": staffComission?.toJson(),
-        "leads": leads.map((e) => e.toJson()).toList()
+        "leads": leads.map((e) => e.toJson()).toList(),
+        "isSold": isSold,
       };
 
   factory Property.fromSnapshot(DocumentSnapshot snapshot) {
@@ -85,6 +86,7 @@ class Property {
       leads = unparsedLeads.map((e) => Lead.fromJson(e)).toList();
     }
     return Property(
+      isSold: json["isSold"],
       title: json["title"],
       parentProject: json["parentProject"] != null ? Project.fromJson(json["parentProject"]) : null,
       docId: json["docId"],
