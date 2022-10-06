@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:real_estate_admin/Modules/Agent/agent_list.dart';
 import 'package:real_estate_admin/Modules/Project/project_list.dart';
+import 'package:real_estate_admin/Modules/Staff/staff_list.dart';
 import 'package:real_estate_admin/Providers/session.dart';
 import 'package:real_estate_admin/auth_gate.dart';
 
@@ -43,6 +44,14 @@ class Home extends StatelessWidget {
                   onTap: () {
                     // session.pageController.jumpToPage(2);
                     Get.offAll(() => const AgentList());
+                  },
+                ),
+                ListTile(
+                  title: const Text("Staffs"),
+                  trailing: const Icon(Icons.people_sharp),
+                  onTap: () {
+                    // session.pageController.jumpToPage(2);
+                    Get.offAll(() => const StaffList());
                   },
                 ),
                 ListTile(

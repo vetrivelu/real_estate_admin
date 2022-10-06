@@ -23,7 +23,7 @@ class _PropertyListState extends State<PropertyList> {
   @override
   Widget build(BuildContext context) {
     var controller = ProjectController(ProjectFormData.fromProject(widget.project));
-    return ChangeNotifierProvider(
+    return ChangeNotifierProvider<ProjectController>(
       create: (context) => controller,
       child: Scaffold(
         appBar: AppBar(
@@ -75,6 +75,7 @@ class _PropertyListState extends State<PropertyList> {
                                     child: Text("No Properties for this project"),
                                   );
                                 } else {
+                                  // selectedProperty = snapshot.data!.first;
                                   return StatefulBuilder(builder: (context, reload) {
                                     return GridView.count(
                                       childAspectRatio: 2.5 / 3,
@@ -118,7 +119,16 @@ class _PropertyListState extends State<PropertyList> {
                 child: Builder(builder: (context) {
                   return StatefulBuilder(builder: (context, reload) {
                     reloadPropertyView = reload;
-                    return PropertyView(property: selectedProperty);
+                    if (selectedProperty == null) {
+                      return const Center(
+                        child: Text("Please select a property to view"),
+                      );
+                    } else {
+                      return PropertyView(
+                        property: selectedProperty!,
+                        project: widget.project,
+                      );
+                    }
                   });
                 })),
           ],

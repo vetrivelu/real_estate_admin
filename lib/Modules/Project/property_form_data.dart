@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../Model/Lead.dart';
 import '../../Model/Property.dart';
@@ -23,6 +24,7 @@ class PropertyViewModel extends ChangeNotifier {
   var staffComission = Commission();
 
   ComissionType comissionType = ComissionType.amount;
+  DocumentReference? reference;
 
   List<dynamic> photos = [];
   List<dynamic> deletedPhotos = [];
@@ -88,6 +90,7 @@ class PropertyViewModel extends ChangeNotifier {
         staffComission: staffComission,
         leads: leads,
         isSold: isSold,
+        reference: reference,
       );
 
   factory PropertyViewModel.fromProperty(Property property) {
@@ -98,7 +101,7 @@ class PropertyViewModel extends ChangeNotifier {
     propertyViewModel.dtcpNumber.text = property.dtcpNumber ?? '';
     propertyViewModel.district.text = property.district ?? '';
     propertyViewModel.taluk.text = property.taluk ?? '';
-    propertyViewModel.features.text = property.features ?? '';
+    propertyViewModel.features.text = property.features;
     propertyViewModel.description.text = property.description ?? '';
     propertyViewModel.coverPhoto = property.coverPhoto ?? '';
     propertyViewModel.photos = property.photos;
@@ -109,6 +112,7 @@ class PropertyViewModel extends ChangeNotifier {
     propertyViewModel.staffComission = property.staffComission ?? Commission();
     propertyViewModel.isSold = property.isSold;
     propertyViewModel.leads = property.leads;
+    propertyViewModel.reference = property.reference;
     return propertyViewModel;
   }
 }

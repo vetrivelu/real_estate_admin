@@ -1,12 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:real_estate_admin/Model/Project.dart';
-import 'package:real_estate_admin/Modules/Project/project_form.dart';
-import 'package:real_estate_admin/Modules/Project/property_form.dart';
-import 'package:real_estate_admin/Modules/Project/property_view.dart';
 import 'package:real_estate_admin/auth_gate.dart';
-import 'package:real_estate_admin/helper.dart';
-
 import 'firebase_options.dart';
 
 void main() async {

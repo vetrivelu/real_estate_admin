@@ -1,5 +1,6 @@
 // ignore: file_names
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:real_estate_admin/Model/Result.dart';
 
 import 'Lead.dart';
 import 'Project.dart';
@@ -33,6 +34,7 @@ class Property {
   Commission? superAgentComission;
   Commission? staffComission;
   bool isSold;
+  DocumentReference? reference;
 
   Property({
     required this.title,
@@ -54,6 +56,7 @@ class Property {
     this.parentProject,
     required this.leads,
     required this.isSold,
+    this.reference,
   });
 
   Map<String, dynamic> toJson() => {
@@ -78,6 +81,15 @@ class Property {
         "isSold": isSold,
       };
 
+  Stream<List<Lead>> getLeads() {
+    return reference!.collection('leads').snapshots().map((snapsot) => snapsot.docs.map((e) => Lead.fromJson(e.data())).toList());
+  }
+
+  Future<Result> addLead(Lead lead) {
+    lead.reference = reference!.collection('leads').doc();
+    return lead.reference!.set(lead.toJson()).then((value) => Result(tilte: Result.success, message: "Lead added successfully"));
+  }
+
   factory Property.fromSnapshot(DocumentSnapshot snapshot) {
     var json = snapshot.data() as Map<String, dynamic>;
     var unparsedLeads = json["leads"];
@@ -86,6 +98,7 @@ class Property {
       leads = unparsedLeads.map((e) => Lead.fromJson(e)).toList();
     }
     return Property(
+      reference: snapshot.reference,
       isSold: json["isSold"],
       title: json["title"],
       parentProject: json["parentProject"] != null ? Project.fromJson(json["parentProject"]) : null,

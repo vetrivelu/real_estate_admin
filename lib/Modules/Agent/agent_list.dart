@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:real_estate_admin/Model/Agent.dart';
+import 'package:real_estate_admin/Modules/Agent/agent_form.dart';
 import 'package:real_estate_admin/widgets/formfield.dart';
 
 class AgentList extends StatefulWidget {
@@ -17,9 +19,23 @@ class _AgentListState extends State<AgentList> {
     super.initState();
   }
 
-  final agentsRef = FirebaseFirestore.instance.collection("agents").where("isStaff", isEqualTo: false);
+  final agentsRef = FirebaseFirestore.instance.collection("agents");
 
   late Query<Map<String, dynamic>> query;
+
+  final searchController = TextEditingController();
+  bool? isApproved = true;
+
+  reload() {
+    query = agentsRef;
+    if (isApproved != null) {
+      query = query.where('isApproved', isEqualTo: isApproved);
+    }
+    if (searchController.text.isNotEmpty) {
+      query = query.where('search', arrayContains: searchController.text.toLowerCase().trim());
+    }
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,73 +48,182 @@ class _AgentListState extends State<AgentList> {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            StreamBuilder(
-              stream: query.snapshots(),
-              builder: (BuildContext context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
-                if (snapshot.connectionState == ConnectionState.active || snapshot.hasData) {
-                  List<Agent> agents = [];
-                  agents = snapshot.data!.docs.map((e) => Agent.fromSnapshot(e)).toList();
-                  if (agents.isEmpty) {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(32.0),
-                        child: Text("No Agents are added yet"),
-                      ),
-                    );
-                  } else {
-                    return Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Card(
-                        child: SizedBox(
-                          width: double.maxFinite,
-                          child: DataTable(
-                            columns: const [
-                              DataColumn(label: Text('Name')),
-                              DataColumn(label: Text('Phone')),
-                              DataColumn(label: Text('PAN')),
-                              DataColumn(label: Text('Email')),
-                              DataColumn(label: Text('Referral Code')),
-                              DataColumn(label: Text('Referred By')),
-                              DataColumn(label: Text('Approved by')),
-                              DataColumn(label: Text('Edit')),
-                              DataColumn(label: Text('Delete')),
-                            ],
-                            rows: agents
-                                .map((e) => DataRow(
-                                      cells: [
-                                        DataCell(TextButton(onPressed: () {}, child: Text("${e.firstName} ${e.lastName}"))),
-                                        DataCell(Text(e.phoneNumber)),
-                                        DataCell(Text(e.panCardNumber ?? '')),
-                                        DataCell(Text(e.email ?? '')),
-                                        DataCell(Text('')),
-                                        DataCell(Text(e.superAgent?.firstName ?? '')),
-                                        DataCell(Text(e.approvedStaff?.firstName ?? '')),
-                                        DataCell(Icon(Icons.edit)),
-                                        DataCell(Icon(Icons.delete)),
-                                      ],
-                                    ))
-                                .toList(),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.all(56.0),
+        child: FloatingActionButton(
+          onPressed: () {
+            // Get.to(() => const AgentForm());
+            showDialog(
+                context: context,
+                builder: (context) {
+                  return const AlertDialog(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                    content: SizedBox(height: 800, width: 600, child: AgentForm()),
+                  );
+                });
+          },
+          child: const Icon(Icons.add),
+        ),
+      ),
+      body: Column(
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SizedBox(
+                height: 100,
+                width: 800,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                        child: Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: TileFormField(controller: searchController, title: "SEARCH"),
+                    )),
+                    Expanded(
+                      child: ListTile(
+                        title: const Text("STATUS"),
+                        subtitle: DropdownButtonFormField<bool?>(
+                          value: isApproved,
+                          items: const [
+                            DropdownMenuItem(value: true, child: Text("ACTIVE")),
+                            DropdownMenuItem(value: false, child: Text("DISABLED")),
+                            DropdownMenuItem(value: null, child: Text("ALL")),
+                          ],
+                          onChanged: (val) {
+                            isApproved = val;
+                            reload();
+                          },
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
                           ),
                         ),
                       ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ElevatedButton(
+                          onPressed: reload,
+                          child: const Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Text("SEARCH"),
+                          )),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: StreamBuilder(
+                stream: query.snapshots(),
+                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.active || snapshot.hasData) {
+                    List<Agent> agents = [];
+                    agents = snapshot.data!.docs.map((e) => Agent.fromSnapshot(e)).toList();
+                    if (agents.isEmpty) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(32.0),
+                          child: Text("No agents are available"),
+                        ),
+                      );
+                    } else {
+                      return Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Card(
+                          child: SizedBox(
+                            width: double.maxFinite,
+                            child: DataTable(
+                              columns: const [
+                                DataColumn(label: Text('Name')),
+                                DataColumn(label: Text('Phone')),
+                                DataColumn(label: Text('PAN')),
+                                DataColumn(label: Text('Email')),
+                                DataColumn(label: Text('Referral Code')),
+                                DataColumn(label: Text('Referred By')),
+                                DataColumn(label: Text('Approved by')),
+                                DataColumn(label: Text('Edit')),
+                                DataColumn(label: Text('Enable/Disable')),
+                              ],
+                              rows: agents
+                                  .map((e) => DataRow(
+                                        cells: [
+                                          DataCell(TextButton(onPressed: () {}, child: Text("${e.firstName} ${e.lastName}"))),
+                                          DataCell(Text(e.phoneNumber)),
+                                          DataCell(Text(e.panCardNumber ?? '')),
+                                          DataCell(Text(e.email ?? '')),
+                                          DataCell(SelectableText(e.referenceCode)),
+                                          DataCell(Text(e.superAgent?.firstName ?? '')),
+                                          DataCell(Text(e.approvedStaff?.firstName ?? '')),
+                                          DataCell(IconButton(
+                                              onPressed: () {
+                                                showDialog(
+                                                    context: context,
+                                                    builder: (context) {
+                                                      return AlertDialog(
+                                                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                                                        content: SizedBox(
+                                                            height: 800,
+                                                            width: 600,
+                                                            child: AgentForm(
+                                                              agent: e,
+                                                            )),
+                                                      );
+                                                    });
+                                              },
+                                              icon: const Icon(Icons.edit))),
+                                          DataCell(!e.isApproved
+                                              ? TextButton(onPressed: e.enable, child: const Text("ENABLE"))
+                                              : TextButton(
+                                                  onPressed: () {
+                                                    showDialog(
+                                                        context: context,
+                                                        builder: (context) {
+                                                          return AlertDialog(
+                                                            shape:
+                                                                const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                                                            title: const Text("Are you sure ?"),
+                                                            content: const Text("This will disable the agent, and stop him from adding leads"),
+                                                            actions: [
+                                                              TextButton(onPressed: Navigator.of(context).pop, child: const Text("NO")),
+                                                              TextButton(
+                                                                  onPressed: () {
+                                                                    e.disable();
+                                                                    Navigator.of(context).pop();
+                                                                  },
+                                                                  child: const Text("YES")),
+                                                            ],
+                                                          );
+                                                        });
+                                                  },
+                                                  child: const Text("DISABLE"))),
+                                        ],
+                                      ))
+                                  .toList(),
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                  }
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: SelectableText(snapshot.data.toString()),
                     );
                   }
-                }
-                if (snapshot.hasError) {
-                  return Center(
-                    child: SelectableText(snapshot.data.toString()),
+                  return const Center(
+                    child: CircularProgressIndicator(),
                   );
-                }
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              },
+                },
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

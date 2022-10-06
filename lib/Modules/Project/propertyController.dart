@@ -6,7 +6,9 @@ import 'package:real_estate_admin/Model/Project.dart';
 import 'package:real_estate_admin/Model/Result.dart';
 import 'package:real_estate_admin/Modules/Project/property_form_data.dart';
 
+import '../../Model/Lead.dart';
 import '../../Model/Property.dart';
+import '../../Model/Staff.dart';
 
 class PropertyController {
   final PropertyViewModel propertyFormData;
@@ -16,6 +18,7 @@ class PropertyController {
   CollectionReference<Map<String, dynamic>> get properties =>
       FirebaseFirestore.instance.collection('projects').doc(project.docId).collection('properties');
   Reference get storage => FirebaseStorage.instance.ref().child(project.docId!);
+  CollectionReference get leadsRef => properties.doc(propertyFormData.docId).collection('leads');
 
   Future<String> uploadFile(Uint8List file, String name) async {
     var ref = storage.child(name);
@@ -39,11 +42,17 @@ class PropertyController {
       }
       propertyFormData.photos = await Future.wait(futures);
     }
-    return properties
-        .doc(propertyFormData.docId)
-        .set(propertyFormData.property.toJson())
-        .then((value) => Result(tilte: Result.success, message: "Property added Successfully"))
-        .onError((error, stackTrace) => Result(tilte: Result.failure, message: "Property Addition Fialed!"));
+    return properties.doc(propertyFormData.docId).set(propertyFormData.property.toJson()).then((value) async {
+      final batch = FirebaseFirestore.instance.batch();
+      if (propertyFormData.property.leads.isNotEmpty) {
+        var leadsRef = properties.doc(propertyFormData.docId).collection('leads');
+        for (var lead in propertyFormData.property.leads) {
+          batch.set(leadsRef.doc(), lead.toJson());
+        }
+        await batch.commit();
+      }
+      return Result(tilte: Result.success, message: "Property added Successfully");
+    }).onError((error, stackTrace) => Result(tilte: Result.failure, message: "Property Addition Fialed!"));
   }
 
   Future<Result> updateProperty() async {
@@ -84,5 +93,27 @@ class PropertyController {
         .delete()
         .then((value) => Result(tilte: Result.success, message: "Property updated Successfully"))
         .onError((error, stackTrace) => Result(tilte: Result.failure, message: "Property update failed!"));
+  }
+
+  Stream<List<Lead>> getLeads() {
+    return leadsRef.snapshots().map((snapsot) => snapsot.docs.map((e) => Lead.fromJson(e.data())).toList());
+  }
+
+  addLead(Lead lead) {
+    DocumentReference reference = leadsRef.doc();
+    lead.reference = reference;
+    reference.set(lead.toJson());
+  }
+
+  assignStaff({required Lead lead, required Staff staff}) {
+    lead.staff = staff;
+  }
+
+  Future<Result> markAsSold() {
+    return properties
+        .doc(propertyFormData.docId)
+        .update({"isSold": true})
+        .then((value) => Result(tilte: Result.success, message: "Property is sold as marked"))
+        .onError((error, stackTrace) => Result(tilte: Result.failure, message: error.toString()));
   }
 }

@@ -1,34 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:real_estate_admin/Model/Agent.dart';
-import 'package:real_estate_admin/Modules/Agent/agent_controller.dart';
-import 'package:real_estate_admin/Modules/Agent/agent_form_state.dart';
+import 'package:real_estate_admin/Model/Staff.dart';
+import 'package:real_estate_admin/Modules/Staff/staff_controller.dart';
+import 'package:real_estate_admin/Modules/Staff/staff_form_state.dart';
+import 'package:real_estate_admin/widgets/formfield.dart';
 import 'package:real_estate_admin/widgets/future_dialog.dart';
 
-import '../../widgets/formfield.dart';
-
-class AgentForm extends StatefulWidget {
-  const AgentForm({Key? key, this.agent}) : super(key: key);
-  final Agent? agent;
-
+class StaffForm extends StatefulWidget {
+  const StaffForm({Key? key, this.staff}) : super(key: key);
+  final Staff? staff;
   @override
-  State<AgentForm> createState() => _AgentFormState();
+  State<StaffForm> createState() => _StaffFormState();
 }
 
-class _AgentFormState extends State<AgentForm> {
+class _StaffFormState extends State<StaffForm> {
   @override
   void initState() {
     super.initState();
-    if (widget.agent != null) {
-      controller = AgentFormController.fromAgent(widget.agent!);
+    if (widget.staff != null) {
+      controller = StaffFormController.fromStaff(widget.staff!);
     }
   }
 
-  AgentFormController controller = AgentFormController();
+  StaffFormController controller = StaffFormController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("AGENT FORM"),
+        title: const Text("STAFF FORM"),
       ),
       body: Column(
         children: [
@@ -73,12 +72,12 @@ class _AgentFormState extends State<AgentForm> {
               height: 60,
               child: ElevatedButton(
                 onPressed: () {
-                  var agentController = AgentController(formController: controller);
+                  var staffController = StaffController(formController: controller);
                   var future;
-                  if (widget.agent == null) {
-                    future = agentController.addAgent();
+                  if (widget.staff == null) {
+                    future = staffController.addStaff();
                   } else {
-                    future = agentController.updateAgent();
+                    future = staffController.updateStaff();
                   }
                   showFutureDialog(context, future: future);
                 },
