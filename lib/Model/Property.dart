@@ -35,12 +35,13 @@ class Property {
   Commission? superAgentComission;
   Commission? staffComission;
   bool isSold;
-  DocumentReference? reference;
+  DocumentReference reference;
   int leadCount;
+
+  DocumentReference get projectRef => FirebaseFirestore.instance.doc(reference.path.split('/properties').first);
 
   Property({
     required this.title,
-    required this.docId,
     this.leadCount = 0,
     this.plotNumber,
     this.surveyNumber,
@@ -59,7 +60,7 @@ class Property {
     this.parentProject,
     required this.leads,
     required this.isSold,
-    this.reference,
+    required this.reference,
   });
 
   Map<String, dynamic> toJson() => {
@@ -137,7 +138,6 @@ class Property {
       isSold: json["isSold"],
       title: json["title"],
       parentProject: json["parentProject"] != null ? Project.fromJson(json["parentProject"]) : null,
-      docId: json["docId"],
       plotNumber: json["plotNumber"],
       surveyNumber: json["surveyNumber"],
       dtcpNumber: json["dtcpNumber"],

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 
@@ -12,7 +13,9 @@ class ProjectFormData extends ChangeNotifier {
   String type = 'House';
   final TextEditingController location = TextEditingController();
 
-  String? docId;
+  DocumentReference? _reference;
+
+  DocumentReference get reference => _reference ?? FirebaseFirestore.instance.collection('projects').doc();
   String? coverPhoto;
 
   List<String> deletedPhotos = [];
@@ -34,7 +37,7 @@ class ProjectFormData extends ChangeNotifier {
 
   factory ProjectFormData.fromProject(Project project) {
     var fromData = ProjectFormData();
-    fromData.docId = project.docId;
+    fromData._reference = project.reference;
     fromData.name.text = project.name;
     fromData.location.text = project.location;
     fromData.type = project.type;
@@ -42,7 +45,7 @@ class ProjectFormData extends ChangeNotifier {
     return fromData;
   }
 
-  Project get object => Project(name: name.text, type: type, location: location.text, coverPhoto: coverPhoto, docId: docId);
+  Project get object => Project(name: name.text, type: type, location: location.text, coverPhoto: coverPhoto, reference: reference);
 
   void removeCoverPhoto() {
     if ((coverPhoto ?? '').isNotEmpty) {

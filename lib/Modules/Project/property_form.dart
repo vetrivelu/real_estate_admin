@@ -169,7 +169,7 @@ class _PropertyFormState extends State<PropertyForm> {
     if (widget.property != null) {
       model = PropertyViewModel.fromProperty(widget.property!);
     } else {
-      model = PropertyViewModel();
+      model = PropertyViewModel(widget.project.reference);
     }
   }
 

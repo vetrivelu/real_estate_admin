@@ -23,7 +23,7 @@ class Lead {
 
   Commission? superAgentComission;
 
-  DocumentReference? reference;
+  DocumentReference reference;
 
   DocumentReference get propertyRef => FirebaseFirestore.instance.doc(reference!.path.split('/leads').first);
 
@@ -45,7 +45,7 @@ class Lead {
     this.staffRef,
     this.agent,
     this.governmentId,
-    this.reference,
+    required this.reference,
     this.leadStatus = LeadStatus.lead,
   });
 

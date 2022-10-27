@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -150,7 +151,7 @@ class ProjectForm extends StatelessWidget {
                     onPressed: () {
                       var projectController = ProjectController(controller);
 
-                      var future = ((controller.docId ?? '').isEmpty) ? projectController.addProject() : projectController.updateProject();
+                      var future = (project == null) ? projectController.addProject() : projectController.updateProject();
                       showFutureDialog(
                         context,
                         future: future,

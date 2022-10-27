@@ -28,7 +28,7 @@ class _LeadFormState extends State<LeadForm> {
     super.initState();
   }
 
-  var controller = LeadFormController();
+  late LeadFormController controller = LeadFormController(widget.property.reference!);
 
   @override
   Widget build(BuildContext context) {

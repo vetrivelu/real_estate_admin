@@ -15,10 +15,9 @@ class PropertyController {
   final Project project;
 
   PropertyController({required this.propertyFormData, required this.project});
-  CollectionReference<Map<String, dynamic>> get properties =>
-      FirebaseFirestore.instance.collection('projects').doc(project.docId).collection('properties');
-  Reference get storage => FirebaseStorage.instance.ref().child(project.docId!);
-  CollectionReference get leadsRef => properties.doc(propertyFormData.docId).collection('leads');
+  CollectionReference<Map<String, dynamic>> get properties => project.reference.collection('properties');
+  Reference get storage => FirebaseStorage.instance.ref().child(project.reference.id);
+  CollectionReference get leadsRef => propertyFormData.reference.collection('leads');
 
   Future<String> uploadFile(Uint8List file, String name) async {
     var ref = storage.child(name);
@@ -29,7 +28,6 @@ class PropertyController {
   }
 
   Future<Result> addProperty() async {
-    propertyFormData.docId = properties.doc().id;
     if (propertyFormData.coverPhototData != null) {
       propertyFormData.coverPhoto = await uploadFile(propertyFormData.coverPhototData!, 'coverPhoto');
     }
@@ -42,10 +40,10 @@ class PropertyController {
       }
       propertyFormData.photos = await Future.wait(futures);
     }
-    return properties.doc(propertyFormData.docId).set(propertyFormData.property.toJson()).then((value) async {
+    return propertyFormData.reference.set(propertyFormData.property.toJson()).then((value) async {
       final batch = FirebaseFirestore.instance.batch();
       if (propertyFormData.property.leads.isNotEmpty) {
-        var leadsRef = properties.doc(propertyFormData.docId).collection('leads');
+        var leadsRef = propertyFormData.reference.collection('leads');
         for (var lead in propertyFormData.property.leads) {
           batch.set(leadsRef.doc(), lead.toJson());
         }
@@ -74,8 +72,7 @@ class PropertyController {
         FirebaseStorage.instance.refFromURL(element).delete();
       }
     }
-    return properties
-        .doc(propertyFormData.docId)
+    return propertyFormData.reference
         .update(propertyFormData.property.toJson())
         .then((value) => Result(tilte: Result.success, message: "Property updated Successfully"))
         .onError((error, stackTrace) => Result(tilte: Result.failure, message: "Property update failed!"));
@@ -88,8 +85,7 @@ class PropertyController {
     for (var element in propertyFormData.deletedPhotos) {
       FirebaseStorage.instance.refFromURL(element).delete();
     }
-    return properties
-        .doc(propertyFormData.docId)
+    return propertyFormData.reference
         .delete()
         .then((value) => Result(tilte: Result.success, message: "Property updated Successfully"))
         .onError((error, stackTrace) => Result(tilte: Result.failure, message: "Property update failed!"));
@@ -110,8 +106,7 @@ class PropertyController {
   }
 
   Future<Result> markAsSold() {
-    return properties
-        .doc(propertyFormData.docId)
+    return propertyFormData.reference
         .update({"isSold": true})
         .then((value) => Result(tilte: Result.success, message: "Property is sold as marked"))
         .onError((error, stackTrace) => Result(tilte: Result.failure, message: error.toString()));

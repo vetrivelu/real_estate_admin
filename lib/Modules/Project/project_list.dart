@@ -123,7 +123,7 @@ class _ProjectListState extends State<ProjectList> {
                 stream: query.snapshots(),
                 builder: (BuildContext context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
                   if ((snapshot.connectionState == ConnectionState.active || snapshot.connectionState == ConnectionState.done) && snapshot.hasData) {
-                    List<Project> projectslist = snapshot.data!.docs.map((e) => Project.fromJson(e.data())).toList();
+                    List<Project> projectslist = snapshot.data!.docs.map((e) => Project.fromSnapshot(e)).toList();
                     return GridView.count(
                       crossAxisCount: 4,
                       children: projectslist.map((e) => ProjectTile(project: e)).toList(),

@@ -17,14 +17,16 @@ class LeadFormController {
   DocumentReference? staffRef;
   Agent? agent;
   Staff? staff;
-  DocumentReference? reference;
+  DocumentReference? _reference;
 
-  LeadFormController();
+  DocumentReference get reference => _reference ?? propertyRef.collection('leads').doc();
 
-  String? get docId => reference?.id;
+  LeadFormController(this.propertyRef);
+
+  final DocumentReference propertyRef;
 
   factory LeadFormController.fromLead(Lead lead) {
-    var controller = LeadFormController();
+    var controller = LeadFormController(lead.propertyRef);
     controller.name.text = lead.name;
     controller.phoneNumber.text = lead.phoneNumber ?? '';
     controller.address.text = lead.address ?? '';
@@ -35,7 +37,7 @@ class LeadFormController {
     controller.staffRef = lead.staffRef;
     controller.agent = lead.agent;
     controller.staff = lead.staff;
-    controller.reference = lead.reference;
+    controller._reference = lead.reference;
     return controller;
   }
 

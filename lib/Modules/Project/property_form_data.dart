@@ -9,7 +9,6 @@ import 'package:image_picker_web/image_picker_web.dart';
 enum Provide { network, memory, logo }
 
 class PropertyViewModel extends ChangeNotifier {
-  String? docId;
   final title = TextEditingController();
   final plotNumber = TextEditingController();
   final surveyNumber = TextEditingController();
@@ -24,7 +23,10 @@ class PropertyViewModel extends ChangeNotifier {
   var staffComission = Commission();
 
   ComissionType comissionType = ComissionType.amount;
-  DocumentReference? reference;
+  DocumentReference? _reference;
+  DocumentReference get reference => _reference ?? projectReference.collection('properties').doc();
+
+  final DocumentReference projectReference;
 
   List<dynamic> photos = [];
   List<dynamic> deletedPhotos = [];
@@ -36,7 +38,7 @@ class PropertyViewModel extends ChangeNotifier {
   List<Uint8List> photosData = [];
   Provide show = Provide.logo;
 
-  PropertyViewModel({this.docId});
+  PropertyViewModel(this.projectReference);
 
   Future<void> pickImages() async {
     var files = await ImagePickerWeb.getMultiImagesAsBytes();
@@ -73,7 +75,6 @@ class PropertyViewModel extends ChangeNotifier {
 
   Property get property => Property(
         title: title.text,
-        docId: docId,
         plotNumber: plotNumber.text,
         surveyNumber: surveyNumber.text,
         dtcpNumber: dtcpNumber.text,
@@ -94,7 +95,7 @@ class PropertyViewModel extends ChangeNotifier {
       );
 
   factory PropertyViewModel.fromProperty(Property property) {
-    var propertyViewModel = PropertyViewModel(docId: property.docId);
+    var propertyViewModel = PropertyViewModel(property.projectRef);
     propertyViewModel.title.text = property.title;
     propertyViewModel.plotNumber.text = property.plotNumber ?? '';
     propertyViewModel.surveyNumber.text = property.surveyNumber ?? '';
@@ -112,7 +113,7 @@ class PropertyViewModel extends ChangeNotifier {
     propertyViewModel.staffComission = property.staffComission ?? Commission();
     propertyViewModel.isSold = property.isSold;
     propertyViewModel.leads = property.leads;
-    propertyViewModel.reference = property.reference;
+    propertyViewModel._reference = property.reference;
     return propertyViewModel;
   }
 }
