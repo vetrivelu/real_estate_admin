@@ -76,41 +76,43 @@ class _AgentListState extends State<AgentList> {
                 width: 800,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                        child: Padding(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: TileFormField(controller: searchController, title: "SEARCH"),
-                    )),
+                    Expanded(child: TileFormField(controller: searchController, title: "SEARCH")),
                     Expanded(
                       child: ListTile(
                         title: const Text("STATUS"),
-                        subtitle: DropdownButtonFormField<bool?>(
-                          value: isApproved,
-                          items: const [
-                            DropdownMenuItem(value: true, child: Text("ACTIVE")),
-                            DropdownMenuItem(value: false, child: Text("DISABLED")),
-                            DropdownMenuItem(value: null, child: Text("ALL")),
-                          ],
-                          onChanged: (val) {
-                            isApproved = val;
-                            reload();
-                          },
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: DropdownButtonFormField<bool?>(
+                            value: isApproved,
+                            items: const [
+                              DropdownMenuItem(value: true, child: Text("ACTIVE")),
+                              DropdownMenuItem(value: false, child: Text("DISABLED")),
+                              DropdownMenuItem(value: null, child: Text("ALL")),
+                            ],
+                            onChanged: (val) {
+                              isApproved = val;
+                              reload();
+                            },
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ElevatedButton(
-                          onPressed: reload,
-                          child: const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text("SEARCH"),
-                          )),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: ElevatedButton(
+                            onPressed: reload,
+                            child: const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Text("SEARCH"),
+                            )),
+                      ),
                     )
                   ],
                 ),
@@ -148,7 +150,7 @@ class _AgentListState extends State<AgentList> {
                                 DataColumn(label: Text('Referred By')),
                                 DataColumn(label: Text('Approved by')),
                                 DataColumn(label: Text('Edit')),
-                                DataColumn(label: Text('Enable/Disable')),
+                                DataColumn(label: Text('Status')),
                               ],
                               rows: agents
                                   .map((e) => DataRow(

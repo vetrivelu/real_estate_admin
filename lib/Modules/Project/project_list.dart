@@ -5,6 +5,7 @@ import 'package:real_estate_admin/Modules/Project/project_controller.dart';
 import 'package:real_estate_admin/Modules/Project/project_form.dart';
 import 'package:real_estate_admin/Modules/Project/project_form_data.dart';
 import 'package:real_estate_admin/Modules/Project/property_list.dart';
+import 'package:real_estate_admin/widgets/formfield.dart';
 
 import '../../Model/Project.dart';
 
@@ -18,16 +19,32 @@ class ProjectList extends StatefulWidget {
 final CollectionReference<Map<String, dynamic>> projects = FirebaseFirestore.instance.collection('projects');
 
 class _ProjectListState extends State<ProjectList> {
+  final search = TextEditingController();
+  String? type;
+
+  reloadQuery() {
+    setState(() {
+      query = projects;
+      if (type != null) {
+        query = query.where('type', isEqualTo: type);
+      }
+      if (search.text.isNotEmpty) {
+        query = query.where('search', arrayContainsAny: search.text.split(' '));
+      }
+    });
+  }
+
+  void setType(String? val) {
+    type = val;
+    reloadQuery();
+  }
+
   Query<Map<String, dynamic>> query = projects;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("PROJECTS"),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: const Icon(Icons.add),
       ),
       body: Column(
         children: [
@@ -36,6 +53,42 @@ class _ProjectListState extends State<ProjectList> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                SizedBox(
+                  width: 300,
+                  child: ListTile(
+                    title: const Text('Project Type'),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButtonFormField<String>(
+                          isDense: true,
+                          decoration: const InputDecoration(border: OutlineInputBorder()),
+                          value: type,
+                          items: const [
+                            DropdownMenuItem<String>(
+                              child: Text("All"),
+                            ),
+                            DropdownMenuItem<String>(
+                              value: 'House',
+                              child: Text("House"),
+                            ),
+                            DropdownMenuItem(value: 'Villa', child: Text("Villa")),
+                            DropdownMenuItem(value: 'Shop', child: Text("Shop")),
+                            DropdownMenuItem(value: 'Building', child: Text("Building")),
+                            DropdownMenuItem(value: 'Land', child: Text("Land")),
+                          ],
+                          onChanged: setType,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 300, child: TileFormField(controller: search, title: 'Search')),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(onPressed: reloadQuery, child: const Text("Search")),
+                ),
+                Expanded(child: Container()),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ElevatedButton(
@@ -43,8 +96,8 @@ class _ProjectListState extends State<ProjectList> {
                         showDialog(
                             context: context,
                             builder: (context) {
-                              return const AlertDialog(
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                              return AlertDialog(
+                                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
                                 content: SizedBox(height: 800, width: 600, child: ProjectForm()),
                               );
                             });
@@ -110,7 +163,7 @@ class ProjectTile extends StatelessWidget {
               fit: BoxFit.cover,
             ),
           ),
-          Divider(),
+          const Divider(),
           ListTile(
             title: Text(project.name),
             subtitle: Text(project.location),

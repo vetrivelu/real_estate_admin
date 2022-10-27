@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:real_estate_admin/Model/Agent.dart';
 import 'package:real_estate_admin/Model/Lead.dart';
-import 'package:real_estate_admin/Model/Project.dart';
 import 'package:real_estate_admin/Model/Property.dart';
 import 'package:real_estate_admin/Model/Staff.dart';
 import 'package:real_estate_admin/Modules/Agent/agent_controller.dart';
 import 'package:real_estate_admin/Modules/Project/leads/lead_form_state.dart';
-import 'package:real_estate_admin/Modules/Project/project_controller.dart';
-import 'package:real_estate_admin/Modules/Project/propertyController.dart';
-import 'package:real_estate_admin/Modules/Project/property_form_data.dart';
 import 'package:real_estate_admin/Modules/Staff/staff_controller.dart';
 import 'package:real_estate_admin/widgets/formfield.dart';
 import 'package:real_estate_admin/widgets/future_dialog.dart';

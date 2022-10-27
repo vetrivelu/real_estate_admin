@@ -6,6 +6,7 @@ import 'package:real_estate_admin/Modules/Project/project_controller.dart';
 import 'package:real_estate_admin/Modules/Project/project_form_data.dart';
 import 'package:real_estate_admin/Modules/Project/property_form.dart';
 import 'package:real_estate_admin/Modules/Project/property_view.dart';
+import 'package:real_estate_admin/widgets/formfield.dart';
 
 class PropertyList extends StatefulWidget {
   const PropertyList({Key? key, required this.project}) : super(key: key);
@@ -19,6 +20,9 @@ class PropertyList extends StatefulWidget {
 class _PropertyListState extends State<PropertyList> {
   Property? selectedProperty;
   void Function(void Function())? reloadPropertyView;
+
+  final search = TextEditingController();
+  bool? isSold;
 
   @override
   Widget build(BuildContext context) {
@@ -37,37 +41,86 @@ class _PropertyListState extends State<PropertyList> {
                   child: Column(
                     children: [
                       AppBar(
+                        elevation: 0,
                         title: Text(
                           "PROPERTY LIST",
                           style: Theme.of(context).textTheme.titleSmall!.copyWith(color: Colors.black),
                         ),
                         centerTitle: true,
                         backgroundColor: Colors.white,
-                        actions: [
-                          ElevatedButton(
-                              onPressed: () {
-                                showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                                        content: SizedBox(height: 800, width: 600, child: PropertyForm(project: widget.project)),
-                                      );
-                                    });
-                              },
-                              child: const Text("ADD"))
+                      ),
+                      const Divider(),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(child: TileFormField(controller: search, title: 'Search')),
+                          Expanded(
+                            child: ListTile(
+                              title: const Text('Project Type'),
+                              subtitle: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButtonFormField<bool?>(
+                                    isDense: true,
+                                    decoration: const InputDecoration(border: OutlineInputBorder()),
+                                    value: isSold,
+                                    items: const [
+                                      DropdownMenuItem(
+                                        child: Text("ALL"),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: false,
+                                        child: Text("AVAILABLE"),
+                                      ),
+                                      DropdownMenuItem(value: true, child: Text("SOLD")),
+                                    ],
+                                    onChanged: (val) {
+                                      setState(() {
+                                        isSold = val;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 14.0, right: 16),
+                            child: SizedBox(
+                              height: 54,
+                              width: 60,
+                              child: ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {});
+                                  },
+                                  child: const Icon(Icons.search)),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 14.0, right: 16),
+                            child: SizedBox(
+                              height: 54,
+                              width: 60,
+                              child: ElevatedButton(
+                                  onPressed: () {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                                            content: SizedBox(height: 800, width: 600, child: PropertyForm(project: widget.project)),
+                                          );
+                                        });
+                                  },
+                                  child: const Icon(Icons.add)),
+                            ),
+                          )
                         ],
                       ),
-                      SizedBox(
-                        height: 60,
-                        width: double.maxFinite,
-                        child: Card(
-                          child: TextFormField(),
-                        ),
-                      ),
+                      const Divider(),
                       Expanded(
                         child: StreamBuilder<List<Property>>(
-                            stream: controller.getPropertiesAsStream(),
+                            stream: controller.getPropertiesAsStream(search: search.text.toLowerCase(), isSold: isSold),
                             builder: (context, AsyncSnapshot<List<Property>> snapshot) {
                               if (snapshot.connectionState == ConnectionState.active && snapshot.hasData) {
                                 if (snapshot.data!.isEmpty) {
@@ -126,7 +179,6 @@ class _PropertyListState extends State<PropertyList> {
                     } else {
                       return PropertyView(
                         property: selectedProperty!,
-                        project: widget.project,
                       );
                     }
                   });

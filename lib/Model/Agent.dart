@@ -20,6 +20,7 @@ class Agent {
   String? ifscCode;
   String? docId;
   String? email;
+  DocumentReference reference;
   DocumentReference? agentReference;
   DocumentReference? approvedStaffReference;
   Agent? superAgent;
@@ -27,7 +28,10 @@ class Agent {
   bool isApproved;
   String referenceCode;
 
-  loadRefrences() async {
+  double commissionAmount;
+  double sharedComissionAmount;
+
+  Future<void> loadRefrences() async {
     if (agentReference != null) {
       superAgent = await agentReference!.get().then((value) => Agent.fromSnapshot(value));
     }
@@ -60,6 +64,9 @@ class Agent {
     this.approvedStaff,
     this.isApproved = false,
     this.superAgent,
+    this.commissionAmount = 0,
+    this.sharedComissionAmount = 0,
+    required this.reference,
   });
 
   Map<String, dynamic> toJson() => {
@@ -84,7 +91,9 @@ class Agent {
         "agentReference": agentReference,
         "approvedStaffReference": approvedStaffReference,
         "email": email,
-        "search": search
+        'commissionAmount': commissionAmount,
+        'sharedComissionAmount': sharedComissionAmount,
+        "search": search,
       };
 
   static List<String> makeSearchstring(String string) {
@@ -108,13 +117,13 @@ class Agent {
     if ((phoneNumber).isNotEmpty) {
       returns.addAll(makeSearchstring(phoneNumber));
     }
-
     return returns;
   }
 
   static Agent fromSnapshot(DocumentSnapshot snapshot) {
     var data = snapshot.data() as Map<String, dynamic>;
     return Agent(
+      reference: snapshot.reference,
       email: data["email"],
       isApproved: data["isApproved"],
       referenceCode: data["referenceCode"],
@@ -135,6 +144,10 @@ class Agent {
       ifscCode: data["ifscCode"],
       panCardNumber: data["panCardNumber"],
       agentReference: data["agentReference"],
+      // approvedStaff: data['approvedStaff'],
+      commissionAmount: data['commissionAmount'] ?? 0,
+      sharedComissionAmount: data['sharedComissionAmount'] ?? 0,
+      superAgent: data['superAgent'],
       approvedStaffReference: data["approvedStaffReference"],
     );
   }
@@ -161,8 +174,19 @@ class Agent {
       ifscCode: data["ifscCode"],
       panCardNumber: data["panCardNumber"],
       agentReference: data["agentReference"],
+      approvedStaff: data["approvedStaff"],
+      commissionAmount: data["commissionAmount"] ?? 0,
+      superAgent: data["superAgent"],
       approvedStaffReference: data["approvedStaffReference"],
+      reference: data["reference"],
     );
+  }
+
+  Future<List<Agent>> getReferrals() async {
+    DocumentReference? agentReference = reference;
+    return FirebaseFirestore.instance.collection('agents').where('agentReference', isEqualTo: agentReference).get().then((value) {
+      return value.docs.map((e) => Agent.fromSnapshot(e)).toList();
+    });
   }
 
   Future<void> disable() {

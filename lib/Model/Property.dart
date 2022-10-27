@@ -1,5 +1,6 @@
 // ignore: file_names
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:real_estate_admin/Model/Result.dart';
 
 import 'Lead.dart';
@@ -35,10 +36,12 @@ class Property {
   Commission? staffComission;
   bool isSold;
   DocumentReference? reference;
+  int leadCount;
 
   Property({
     required this.title,
     required this.docId,
+    this.leadCount = 0,
     this.plotNumber,
     this.surveyNumber,
     this.dtcpNumber,
@@ -60,6 +63,7 @@ class Property {
   });
 
   Map<String, dynamic> toJson() => {
+        'leadCount': leadCount,
         "title": title,
         "docId": docId,
         "parentProject": parentProject?.toJson(),
@@ -79,6 +83,7 @@ class Property {
         "staffComission": staffComission?.toJson(),
         "leads": leads.map((e) => e.toJson()).toList(),
         "isSold": isSold,
+        "search": search,
       };
 
   Stream<List<Lead>> getLeads() {
@@ -86,8 +91,38 @@ class Property {
   }
 
   Future<Result> addLead(Lead lead) {
+    var batch = FirebaseFirestore.instance.batch();
     lead.reference = reference!.collection('leads').doc();
-    return lead.reference!.set(lead.toJson()).then((value) => Result(tilte: Result.success, message: "Lead added successfully"));
+    batch.set(lead.reference!, lead.toJson());
+    batch.update(lead.propertyRef, {'leadCount': FieldValue.increment(1)});
+    return batch.commit().then((value) {
+      return Result(tilte: Result.success, message: 'Lead added successfully');
+    });
+  }
+
+  List<String> get search {
+    List<String> returns = [];
+    returns.addAll(makeSearchstring(plotNumber ?? ''));
+    returns.addAll(makeSearchstring(surveyNumber ?? ''));
+    returns.addAll(makeSearchstring(dtcpNumber ?? ''));
+    returns.addAll(makeSearchstring(title));
+    return returns;
+  }
+
+  List<String> makeSearchstring(String string) {
+    if (string.isEmpty) {
+      return [];
+    }
+    List<String> wordList = string.split(' ');
+    Set<String> list = {};
+    for (var element in wordList) {
+      for (int i = 1; i < element.length; i++) {
+        list.add(element.substring(0, i).trim().toLowerCase());
+      }
+      list.add(element.trim().toLowerCase());
+    }
+    list.add(string.toLowerCase());
+    return list.toList();
   }
 
   factory Property.fromSnapshot(DocumentSnapshot snapshot) {
@@ -141,4 +176,11 @@ class Commission {
   Map<String, dynamic> toJson() {
     return {"comissionType": comissionType.index, "value": value};
   }
+}
+
+class ComissionController {
+  ComissionType comissionType = ComissionType.amount;
+  TextEditingController value = TextEditingController(text: '0.00');
+
+  Commission get comission => Commission(comissionType: comissionType, value: double.tryParse(value.text) ?? 0);
 }

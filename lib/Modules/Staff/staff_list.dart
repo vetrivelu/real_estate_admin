@@ -94,7 +94,11 @@ class _StaffListState extends State<StaffList> {
                                                   ));
                                             },
                                             icon: const Icon(Icons.edit))),
-                                        const DataCell(Icon(Icons.delete)),
+                                        DataCell(IconButton(
+                                            onPressed: () {
+                                              e.delete();
+                                            },
+                                            icon: const Icon(Icons.delete))),
                                       ],
                                     ))
                                 .toList(),

@@ -22,12 +22,16 @@ class Project {
   }
 
   List<String> makeSearchstring(String string) {
-    List<String> list = [];
-    for (int i = 1; i < string.length; i++) {
-      list.add(string.substring(0, i).toLowerCase());
+    List<String> wordList = string.split(' ');
+    Set<String> list = {};
+    for (var element in wordList) {
+      for (int i = 1; i < element.length; i++) {
+        list.add(element.substring(0, i).trim().toLowerCase());
+      }
+      list.add(element.trim().toLowerCase());
     }
     list.add(string.toLowerCase());
-    return list;
+    return list.toList();
   }
 
   toJson() {

@@ -24,11 +24,21 @@ class StaffFormController {
   Staff? superAgent;
   Staff? approvedStaff;
 
-  String get newDocId => FirebaseFirestore.instance.collection('staffs').doc().id;
+  // String get newDocId => FirebaseFirestore.instance.collection('staffs').doc().id;
+
+  DocumentReference? _reference;
+
+  DocumentReference get reference {
+    if (_reference != null) {
+      _reference = FirebaseFirestore.instance.collection('staffs').doc();
+    }
+    return _reference!;
+  }
 
   Staff get staff => Staff(
+        reference: reference,
         panCardNumber: panCardNumber.text,
-        docId: docId ?? newDocId,
+        docId: docId ?? reference.id,
         phoneNumber: phoneNumber.text,
         firstName: firstName.text,
         lastName: lastName.text,
@@ -63,6 +73,7 @@ class StaffFormController {
     controller.ifscCode.text = staff.ifscCode ?? '';
     controller.docId = staff.docId;
     controller.email.text = staff.email;
+    controller._reference = staff.reference;
     return controller;
   }
 }

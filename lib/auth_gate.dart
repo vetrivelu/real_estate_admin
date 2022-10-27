@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutterfire_ui/auth.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:real_estate_admin/Modules/Dashboard/dashboard.dart';
 import 'package:real_estate_admin/Providers/session.dart';
 import 'package:real_estate_admin/home.dart';
 import 'package:real_estate_admin/login_screen.dart';

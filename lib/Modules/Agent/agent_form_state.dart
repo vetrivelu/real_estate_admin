@@ -3,12 +3,11 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:real_estate_admin/Model/Staff.dart';
-import 'package:real_estate_admin/Modules/Agent/agent_form.dart';
 
 import '../../Model/Agent.dart';
 
 class AgentFormController {
-  AgentFormController({this.docId});
+  AgentFormController();
   TextEditingController firstName = TextEditingController();
   TextEditingController lastName = TextEditingController();
   TextEditingController phoneNumber = TextEditingController();
@@ -24,7 +23,6 @@ class AgentFormController {
   TextEditingController bankName = TextEditingController();
   TextEditingController branch = TextEditingController();
   TextEditingController ifscCode = TextEditingController();
-  String? docId;
   TextEditingController email = TextEditingController();
   DocumentReference? agentReference;
   DocumentReference? approvedStaffReference;
@@ -39,7 +37,6 @@ class AgentFormController {
     controller.panCardNumber.text = agent.panCardNumber ?? '';
     controller.agentReference = agent.agentReference;
     controller.approvedStaffReference = agent.approvedStaffReference;
-    controller.docId = agent.docId;
     controller.phoneNumber.text = agent.phoneNumber;
     controller.firstName.text = agent.firstName;
     controller.lastName.text = agent.lastName ?? '';
@@ -60,14 +57,17 @@ class AgentFormController {
   }
 
   String get newReferenceCode => (Random.secure().nextInt(999999) + 100000).toString();
-  String get newDocId => FirebaseFirestore.instance.collection('agents').doc().id;
+  DocumentReference? _reference;
+  DocumentReference get reference {
+    return _reference ?? FirebaseFirestore.instance.collection('agents').doc();
+  }
 
   Agent get agent => Agent(
         referenceCode: referenceCode ?? newReferenceCode,
         panCardNumber: panCardNumber.text,
         agentReference: agentReference,
         approvedStaffReference: approvedStaffReference,
-        docId: docId ?? newDocId,
+        docId: reference.id,
         phoneNumber: phoneNumber.text,
         firstName: firstName.text,
         lastName: lastName.text,
@@ -86,5 +86,6 @@ class AgentFormController {
         isApproved: isApproved,
         approvedStaff: approvedStaff,
         superAgent: superAgent,
+        reference: reference,
       );
 }

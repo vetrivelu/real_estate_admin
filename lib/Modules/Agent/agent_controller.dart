@@ -57,4 +57,5 @@ class AgentController {
       return value.docs.map((e) => Agent.fromSnapshot(e)).toList();
     });
   }
+
 }

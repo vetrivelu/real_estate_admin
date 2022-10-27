@@ -1,4 +1,7 @@
+import 'dart:html';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:real_estate_admin/Model/Result.dart';
 
 class Staff {
   final String firstName;
@@ -17,8 +20,10 @@ class Staff {
   final String? ifscCode;
   final String docId;
   final String email;
+  final DocumentReference reference;
 
   Staff({
+    required this.reference,
     required this.docId,
     required this.phoneNumber,
     required this.firstName,
@@ -38,6 +43,7 @@ class Staff {
   });
 
   Map<String, dynamic> toJson() => {
+        "reference": reference,
         "docId": docId,
         "phoneNumber": phoneNumber,
         "firstName": firstName,
@@ -85,6 +91,7 @@ class Staff {
   static Staff fromSnapshot(DocumentSnapshot snapshot) {
     var data = snapshot.data() as Map<String, dynamic>;
     return Staff(
+      reference: snapshot.reference,
       docId: data["docId"],
       phoneNumber: data["phoneNumber"],
       firstName: data["firstName"],
@@ -106,6 +113,7 @@ class Staff {
 
   factory Staff.fromJson(data) {
     return Staff(
+      reference: data['reference'],
       docId: data["docId"],
       phoneNumber: data["phoneNumber"],
       firstName: data["firstName"],
@@ -123,5 +131,30 @@ class Staff {
       branch: data["branch"],
       ifscCode: data["ifscCode"],
     );
+  }
+
+  static Future<List<Staff>> getStaffs() {
+    return FirebaseFirestore.instance.collection('staffs').get().then((value) => value.docs.map((e) => Staff.fromSnapshot(e)).toList());
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is Staff) {
+      if (reference == other.reference) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @override
+  // TODO: implement hashCode
+  int get hashCode => super.hashCode;
+
+  Future<Result> delete() {
+    return reference
+        .delete()
+        .then((value) => Result(tilte: Result.success, message: "Staff deleted successfully"))
+        .onError((error, stackTrace) => Result(tilte: Result.failure, message: "Could not delete document"));
   }
 }

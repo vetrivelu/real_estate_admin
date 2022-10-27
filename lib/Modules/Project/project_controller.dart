@@ -57,10 +57,10 @@ class ProjectController extends ChangeNotifier {
     return projects
         .doc(project.docId)
         .update(project.toJson())
-        .then((value) => Result(tilte: Result.success, message: "Project Added Successfully"))
+        .then((value) => Result(tilte: Result.success, message: "Project updated Successfully"))
         .onError((error, stackTrace) {
       print(error.toString());
-      return Result(tilte: Result.failure, message: 'Project Addition Failed.\n ${error.toString()}');
+      return Result(tilte: Result.failure, message: 'Project update Failed.\n ${error.toString()}');
     });
   }
 
@@ -70,11 +70,13 @@ class ProjectController extends ChangeNotifier {
     }
     await projects.doc(projectFormData.docId).collection('properties').get().then((snapshot) {
       var thisProperties = snapshot.docs.map((e) => Property.fromSnapshot(e));
+      List<Future> futures = [];
       for (var property in thisProperties) {
         var propertyFormData = PropertyViewModel.fromProperty(property);
         var controller = PropertyController(propertyFormData: propertyFormData, project: projectFormData.object);
-        controller.deleteProperty();
+        futures.add(controller.deleteProperty());
       }
+      return Future.wait(futures);
     });
     return projects
         .doc(projectFormData.docId)
@@ -83,8 +85,15 @@ class ProjectController extends ChangeNotifier {
         .onError((error, stackTrace) => Result(tilte: Result.failure, message: 'Project Deletion Failed.\n ${error.toString()}'));
   }
 
-  Stream<List<Property>> getPropertiesAsStream() {
-    return currentProject!.collection('properties').snapshots().map((event) {
+  Stream<List<Property>> getPropertiesAsStream({String? search, bool? isSold}) {
+    Query<Map<String, dynamic>> query = currentProject!.collection('properties');
+    if ((search ?? '').isNotEmpty) {
+      query = query.where('search', arrayContains: search!.toLowerCase().trim());
+    }
+    if (isSold != null) {
+      query = query.where('isSold', isEqualTo: isSold);
+    }
+    return query.snapshots().map((event) {
       return event.docs.map((e) => Property.fromSnapshot(e)).toList();
     });
   }
