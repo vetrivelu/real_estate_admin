@@ -88,13 +88,13 @@ class Property {
       };
 
   Stream<List<Lead>> getLeads() {
-    return reference!.collection('leads').snapshots().map((snapsot) => snapsot.docs.map((e) => Lead.fromJson(e.data())).toList());
+    return reference.collection('leads').snapshots().map((snapsot) => snapsot.docs.map((e) => Lead.fromJson(e.data(), e.reference)).toList());
   }
 
   Future<Result> addLead(Lead lead) {
     var batch = FirebaseFirestore.instance.batch();
-    lead.reference = reference!.collection('leads').doc();
-    batch.set(lead.reference!, lead.toJson());
+    lead.reference = reference.collection('leads').doc();
+    batch.set(lead.reference, lead.toJson());
     batch.update(lead.propertyRef, {'leadCount': FieldValue.increment(1)});
     return batch.commit().then((value) {
       return Result(tilte: Result.success, message: 'Lead added successfully');
@@ -131,7 +131,7 @@ class Property {
     var unparsedLeads = json["leads"];
     List<Lead> leads = [];
     if (unparsedLeads is List && unparsedLeads.isNotEmpty) {
-      leads = unparsedLeads.map((e) => Lead.fromJson(e)).toList();
+      leads = unparsedLeads.map((e) => Lead.fromJson(e, snapshot.reference)).toList();
     }
     return Property(
       reference: snapshot.reference,
@@ -181,6 +181,8 @@ class Commission {
 class ComissionController {
   ComissionType comissionType = ComissionType.amount;
   TextEditingController value = TextEditingController(text: '0.00');
+  TextEditingController amount = TextEditingController();
+  TextEditingController owner = TextEditingController();
 
   Commission get comission => Commission(comissionType: comissionType, value: double.tryParse(value.text) ?? 0);
 }

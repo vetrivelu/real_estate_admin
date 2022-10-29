@@ -28,7 +28,7 @@ class _LeadFormState extends State<LeadForm> {
     super.initState();
   }
 
-  late LeadFormController controller = LeadFormController(widget.property.reference!);
+  late LeadFormController controller = LeadFormController(widget.property.reference);
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +168,7 @@ class _LeadFormState extends State<LeadForm> {
                       },
                       onSelected: (staff) {
                         controller.staff = staff;
-                        controller.staffRef = StaffController.staffRef.doc(staff.docId);
+                        controller.staffRef = staff.reference;
                       },
                     ),
                   );

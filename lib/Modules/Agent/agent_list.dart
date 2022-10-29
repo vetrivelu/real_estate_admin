@@ -24,13 +24,11 @@ class _AgentListState extends State<AgentList> {
   late Query<Map<String, dynamic>> query;
 
   final searchController = TextEditingController();
-  bool? isApproved = true;
+  ActiveStatus activeStatus = ActiveStatus.active;
 
   reload() {
     query = agentsRef;
-    if (isApproved != null) {
-      query = query.where('isApproved', isEqualTo: isApproved);
-    }
+    query = query.where('activeStatus', isEqualTo: activeStatus.index);
     if (searchController.text.isNotEmpty) {
       query = query.where('search', arrayContains: searchController.text.toLowerCase().trim());
     }
@@ -84,15 +82,15 @@ class _AgentListState extends State<AgentList> {
                         title: const Text("STATUS"),
                         subtitle: Padding(
                           padding: const EdgeInsets.only(top: 8),
-                          child: DropdownButtonFormField<bool?>(
-                            value: isApproved,
+                          child: DropdownButtonFormField<ActiveStatus>(
+                            value: activeStatus,
                             items: const [
-                              DropdownMenuItem(value: true, child: Text("ACTIVE")),
-                              DropdownMenuItem(value: false, child: Text("DISABLED")),
-                              DropdownMenuItem(value: null, child: Text("ALL")),
+                              DropdownMenuItem(value: ActiveStatus.active, child: Text("ACTIVE")),
+                              DropdownMenuItem(value: ActiveStatus.blocked, child: Text("BLOCKED")),
+                              DropdownMenuItem(value: ActiveStatus.pendingApproval, child: Text("YET TO APPROVE")),
                             ],
                             onChanged: (val) {
-                              isApproved = val;
+                              activeStatus = val ?? activeStatus;
                               reload();
                             },
                             decoration: const InputDecoration(
@@ -179,7 +177,7 @@ class _AgentListState extends State<AgentList> {
                                                     });
                                               },
                                               icon: const Icon(Icons.edit))),
-                                          DataCell(!e.isApproved
+                                          DataCell(!(e.activeStatus == ActiveStatus.pendingApproval)
                                               ? TextButton(onPressed: e.enable, child: const Text("ENABLE"))
                                               : TextButton(
                                                   onPressed: () {

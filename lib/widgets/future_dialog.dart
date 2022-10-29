@@ -22,7 +22,13 @@ showFutureDialog(
                   return AlertDialog(
                     title: Text(snapshot.data!.tilte),
                     content: Text(snapshot.data!.message),
-                    actions: [TextButton(onPressed: () {}, child: const Text("OKAY"))],
+                    actions: [
+                      TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text("OKAY"))
+                    ],
                   );
                 } else {
                   return AlertDialog(

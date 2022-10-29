@@ -146,7 +146,7 @@ class _PropertyListState extends State<PropertyList> {
                                                 },
                                                 child: PropertyTile(
                                                   property: e,
-                                                  selected: e.docId == selectedProperty?.docId,
+                                                  selected: e.reference == selectedProperty?.reference,
                                                 ),
                                               ))
                                           .toList(),
@@ -207,12 +207,17 @@ class PropertyTile extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              AspectRatio(
-                aspectRatio: 16 / 9,
-                child: Image.network(
-                  property.coverPhoto ?? 'https://picsum.photos/id/1/200/300',
-                  fit: BoxFit.cover,
-                ),
+              Stack(
+                children: [
+                  AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: Image.network(
+                      property.coverPhoto ?? 'https://picsum.photos/id/1/200/300',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Positioned.fill(child: property.isSold ? Image.asset('assets/sold.png') : Container()),
+                ],
               ),
               const Divider(),
               ListTile(

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:real_estate_admin/Model/Staff.dart';
-import 'package:real_estate_admin/Providers/session.dart';
+
+enum ActiveStatus { pendingApproval, active, blocked }
 
 class Agent {
   String firstName;
@@ -18,22 +19,22 @@ class Agent {
   String? bankName;
   String? branch;
   String? ifscCode;
-  String? docId;
+  String get docId => reference.id;
   String? email;
   DocumentReference reference;
-  DocumentReference? agentReference;
+  DocumentReference? superAgentReference;
   DocumentReference? approvedStaffReference;
   Agent? superAgent;
   Staff? approvedStaff;
-  bool isApproved;
+  ActiveStatus activeStatus;
   String referenceCode;
 
   double commissionAmount;
   double sharedComissionAmount;
 
   Future<void> loadRefrences() async {
-    if (agentReference != null) {
-      superAgent = await agentReference!.get().then((value) => Agent.fromSnapshot(value));
+    if (superAgentReference != null) {
+      superAgent = await superAgentReference!.get().then((value) => Agent.fromSnapshot(value));
     }
     if (approvedStaffReference != null) {
       approvedStaff = await approvedStaffReference!.get().then((value) => Staff.fromSnapshot(value));
@@ -43,9 +44,8 @@ class Agent {
   Agent({
     required this.referenceCode,
     this.panCardNumber,
-    this.agentReference,
+    this.superAgentReference,
     this.approvedStaffReference,
-    required this.docId,
     required this.phoneNumber,
     required this.firstName,
     this.lastName,
@@ -62,7 +62,7 @@ class Agent {
     this.branch,
     this.ifscCode,
     this.approvedStaff,
-    this.isApproved = false,
+    this.activeStatus = ActiveStatus.pendingApproval,
     this.superAgent,
     this.commissionAmount = 0,
     this.sharedComissionAmount = 0,
@@ -70,7 +70,6 @@ class Agent {
   });
 
   Map<String, dynamic> toJson() => {
-        "isApproved": isApproved,
         "referenceCode": referenceCode,
         "firstName": firstName,
         "lastName": lastName,
@@ -88,12 +87,13 @@ class Agent {
         "ifscCode": ifscCode,
         "panCardNumber": panCardNumber,
         "docId": docId,
-        "agentReference": agentReference,
+        "superAgentReference": superAgentReference,
         "approvedStaffReference": approvedStaffReference,
         "email": email,
         'commissionAmount': commissionAmount,
         'sharedComissionAmount': sharedComissionAmount,
         "search": search,
+        "activeStatus": activeStatus.index,
       };
 
   static List<String> makeSearchstring(String string) {
@@ -123,11 +123,11 @@ class Agent {
   static Agent fromSnapshot(DocumentSnapshot snapshot) {
     var data = snapshot.data() as Map<String, dynamic>;
     return Agent(
+      approvedStaff: data['approvedStaff'],
       reference: snapshot.reference,
       email: data["email"],
-      isApproved: data["isApproved"],
+      activeStatus: data['activeStatus'] == null ? ActiveStatus.pendingApproval : ActiveStatus.values.elementAt(data['activeStatus']),
       referenceCode: data["referenceCode"],
-      docId: snapshot.id,
       firstName: data["firstName"],
       lastName: data["lastName"],
       phoneNumber: data["phoneNumber"],
@@ -143,7 +143,7 @@ class Agent {
       branch: data["branch"],
       ifscCode: data["ifscCode"],
       panCardNumber: data["panCardNumber"],
-      agentReference: data["agentReference"],
+      superAgentReference: data["superAgentReference"],
       // approvedStaff: data['approvedStaff'],
       commissionAmount: data['commissionAmount'] ?? 0,
       sharedComissionAmount: data['sharedComissionAmount'] ?? 0,
@@ -154,10 +154,10 @@ class Agent {
 
   factory Agent.fromJson(Map<String, dynamic> data) {
     return Agent(
+      sharedComissionAmount: data['sharedComissionAmount'],
       email: data["email"],
-      isApproved: data["isApproved"],
+      activeStatus: data['activeStatus'] ?? ActiveStatus.pendingApproval,
       referenceCode: data["referenceCode"],
-      docId: data["docId"],
       firstName: data["firstName"],
       lastName: data["lastName"],
       phoneNumber: data["phoneNumber"],
@@ -173,7 +173,7 @@ class Agent {
       branch: data["branch"],
       ifscCode: data["ifscCode"],
       panCardNumber: data["panCardNumber"],
-      agentReference: data["agentReference"],
+      superAgentReference: data["superAgentReference"],
       approvedStaff: data["approvedStaff"],
       commissionAmount: data["commissionAmount"] ?? 0,
       superAgent: data["superAgent"],
@@ -183,19 +183,21 @@ class Agent {
   }
 
   Future<List<Agent>> getReferrals() async {
-    DocumentReference? agentReference = reference;
-    return FirebaseFirestore.instance.collection('agents').where('agentReference', isEqualTo: agentReference).get().then((value) {
+    DocumentReference? superAgentReference = reference;
+    return FirebaseFirestore.instance.collection('agents').where('superAgentReference', isEqualTo: superAgentReference).get().then((value) {
       return value.docs.map((e) => Agent.fromSnapshot(e)).toList();
     });
   }
 
   Future<void> disable() {
-    return FirebaseFirestore.instance.collection('agents').doc(docId).update({"isApproved": false});
+    return FirebaseFirestore.instance.collection('agents').doc(docId).update({
+      "activeStatus": ActiveStatus.blocked,
+    });
   }
 
   Future<void> enable() {
     return FirebaseFirestore.instance.collection('agents').doc(docId).update({
-      "isApproved": true,
+      "activeStatus": ActiveStatus.active,
     });
   }
 }

@@ -11,24 +11,21 @@ class StaffController {
   Staff get staff => formController.staff;
 
   Future<Result> addStaff() {
-    return staffRef
-        .doc(staff.docId)
+    return staff.reference
         .set(staff.toJson())
         .then((value) => Result(tilte: Result.success, message: "Sgent added Successfully"))
-        .onError((error, stackTrace) => Result(tilte: Result.failure, message: "Staff addition failed"));
+        .onError((error, stackTrace) => Result(tilte: "Staff addition Failed", message: error.toString()));
   }
 
   Future<Result> updateStaff() {
-    return staffRef
-        .doc(staff.docId)
+    return staff.reference
         .set(staff.toJson())
         .then((value) => Result(tilte: Result.success, message: "Staff record updated successfully"))
         .onError((error, stackTrace) => Result(tilte: Result.failure, message: "Staff record update failed"));
   }
 
   Future<Result> deleteStaff() {
-    return staffRef
-        .doc(staff.docId)
+    return staff.reference
         .delete()
         .then((value) => Result(tilte: Result.success, message: "Staff record updated successfully"))
         .onError((error, stackTrace) => Result(tilte: Result.failure, message: "Staff record update failed"));

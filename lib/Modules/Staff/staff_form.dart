@@ -29,63 +29,83 @@ class _StaffFormState extends State<StaffForm> {
       appBar: AppBar(
         title: const Text("STAFF FORM"),
       ),
-      body: Column(
-        children: [
-          const SizedBox(height: 30),
-          Row(
-            children: [
-              Expanded(
-                child: TileFormField(controller: controller.firstName, title: "First Name"),
-              ),
-              Expanded(
-                child: TileFormField(controller: controller.lastName, title: "Last Name"),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: TileFormField(controller: controller.email, title: "EMAIL"),
-              ),
-              Expanded(
-                child: TileFormField(controller: controller.phoneNumber, title: "PHONE NUMBER"),
-              ),
-            ],
-          ),
-          TileFormField(controller: controller.panCardNumber, title: "PAN NUMBER"),
-          TileFormField(controller: controller.addressLine1, title: "ADDRESS LINE 1"),
-          TileFormField(controller: controller.addressLine2, title: "ADDRESS LINE 2"),
-          Row(
-            children: [
-              Expanded(
-                child: TileFormField(controller: controller.city, title: "CITY"),
-              ),
-              Expanded(
-                child: TileFormField(controller: controller.pincode, title: "PIN CODE"),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SizedBox(
-              width: double.maxFinite,
-              height: 60,
-              child: ElevatedButton(
-                onPressed: () {
-                  var staffController = StaffController(formController: controller);
-                  var future;
-                  if (widget.staff == null) {
-                    future = staffController.addStaff();
-                  } else {
-                    future = staffController.updateStaff();
-                  }
-                  showFutureDialog(context, future: future);
-                },
-                child: const Text("SUBMIT"),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 30),
+            Row(
+              children: [
+                Expanded(
+                  child: TileFormField(controller: controller.firstName, title: "First Name"),
+                ),
+                Expanded(
+                  child: TileFormField(controller: controller.lastName, title: "Last Name"),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: TileFormField(controller: controller.email, title: "EMAIL"),
+                ),
+                Expanded(
+                  child: TileFormField(controller: controller.phoneNumber, title: "PHONE NUMBER"),
+                ),
+              ],
+            ),
+            TileFormField(controller: controller.panCardNumber, title: "PAN NUMBER"),
+            TileFormField(controller: controller.addressLine1, title: "ADDRESS LINE 1"),
+            TileFormField(controller: controller.addressLine2, title: "ADDRESS LINE 2"),
+            Row(
+              children: [
+                Expanded(
+                  child: TileFormField(controller: controller.city, title: "CITY"),
+                ),
+                Expanded(
+                  child: TileFormField(controller: controller.pincode, title: "PIN CODE"),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: CheckboxListTile(
+                      title: const Text('Mark as Admin'),
+                      value: controller.isAdmin,
+                      onChanged: (val) {
+                        setState(() {
+                          controller.isAdmin = val ?? controller.isAdmin;
+                        });
+                      }),
+                ),
+                Expanded(
+                  child: Container(),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                width: double.maxFinite,
+                height: 60,
+                child: ElevatedButton(
+                  onPressed: () {
+                    var staffController = StaffController(formController: controller);
+                    // print(controller.staff.toJson());
+                    var future;
+                    if (widget.staff == null) {
+                      future = staffController.addStaff();
+                    } else {
+                      future = staffController.updateStaff();
+                    }
+                    showFutureDialog(context, future: future);
+                  },
+                  child: const Text("SUBMIT"),
+                ),
               ),
             ),
-          )
-        ],
+          ],
+        ),
       ),
     );
   }

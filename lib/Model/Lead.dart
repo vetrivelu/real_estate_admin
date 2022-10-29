@@ -25,7 +25,7 @@ class Lead {
 
   DocumentReference reference;
 
-  DocumentReference get propertyRef => FirebaseFirestore.instance.doc(reference!.path.split('/leads').first);
+  DocumentReference get propertyRef => FirebaseFirestore.instance.doc(reference.path.split('/leads').first);
 
   Agent? agent;
   Staff? staff;
@@ -40,7 +40,7 @@ class Lead {
     this.address,
     this.email,
     required this.enquiryDate,
-    required this.agentRef,
+    this.agentRef,
     this.staff,
     this.staffRef,
     this.agent,
@@ -49,10 +49,10 @@ class Lead {
     this.leadStatus = LeadStatus.lead,
   });
 
-  void assignStaff(Staff temp) {
-    staff = temp;
-    staffRef = temp.reference;
-    reference!.update(toJson());
+  void assignStaff(DocumentReference staffRefence) async {
+    staff = await staffRefence.get().then((value) => Staff.fromSnapshot(value));
+    staffRef = staffRefence;
+    reference.update(toJson());
   }
 
   toJson() => {
@@ -67,38 +67,40 @@ class Lead {
         "staff": staff?.toJson(),
         "governmentId": governmentId,
         "reference": reference,
-        "leadStatus": leadStatus,
+        "leadStatus": leadStatus.index,
       };
-  factory Lead.fromJson(json) {
+  factory Lead.fromJson(json, DocumentReference reference) {
     return Lead(
-        name: json["name"],
-        phoneNumber: json["phoneNumber"],
-        address: json["address"],
-        email: json["email"],
-        enquiryDate: json["enquiryDate"].toDate(),
-        governmentId: json['governmentId'],
-        agentRef: json["agentRef"],
-        staffRef: json["staffRef"],
-        reference: json["reference"],
-        leadStatus: json["leadStatus"],
-        agent: json["agent"] != null ? Agent.fromJson(json["agent"]) : null,
-        staff: json["staff"] != null ? Staff.fromJson(json["staff"]) : null);
+      name: json["name"],
+      phoneNumber: json["phoneNumber"],
+      address: json["address"],
+      email: json["email"],
+      enquiryDate: json["enquiryDate"].toDate(),
+      governmentId: json['governmentId'],
+      agentRef: json["agentRef"],
+      staffRef: json["staffRef"],
+      reference: reference,
+      leadStatus: LeadStatus.values.elementAt(json["leadStatus"]),
+      agent: json["agent"] != null ? Agent.fromJson(json["agent"]) : null,
+      staff: json["staff"] != null ? Staff.fromJson(json["staff"]) : null,
+    );
   }
   factory Lead.fromSnapshot(DocumentSnapshot<Map<String, dynamic>> snapshot) {
     Map<String, dynamic> json = snapshot.data()!;
     return Lead(
-        name: json["name"],
-        phoneNumber: json["phoneNumber"],
-        address: json["address"],
-        email: json["email"],
-        enquiryDate: json["enquiryDate"].toDate(),
-        governmentId: json['governmentId'],
-        agentRef: json["agentRef"],
-        staffRef: json["staffRef"],
-        reference: json["reference"],
-        leadStatus: json["leadStatus"],
-        agent: json["agent"] != null ? Agent.fromJson(json["agent"]) : null,
-        staff: json["staff"] != null ? Staff.fromJson(json["staff"]) : null);
+      name: json["name"],
+      phoneNumber: json["phoneNumber"],
+      address: json["address"],
+      email: json["email"],
+      enquiryDate: json["enquiryDate"].toDate(),
+      governmentId: json['governmentId'],
+      agentRef: json["agentRef"],
+      staffRef: json["staffRef"],
+      reference: snapshot.reference,
+      leadStatus: LeadStatus.values.elementAt(json["leadStatus"]),
+      // agent: json["agent"] != null ? Agent.fromJson(json["agent"]) : null,
+      // staff: json["staff"] != null ? Staff.fromJson(json["staff"]) : null,
+    );
   }
 
   double get staffComissionAmount {
@@ -144,7 +146,7 @@ class Lead {
   }
 
   static Stream<List<Lead>> getSales({Agent? agent, Staff? staff}) {
-    return FirebaseFirestore.instance.collectionGroup('leads').snapshots().map((event) {
+    return FirebaseFirestore.instance.collectionGroup('leads').where('leadStatus', isNotEqualTo: LeadStatus.lead.index).snapshots().map((event) {
       return event.docs.map((e) => Lead.fromSnapshot(e)).toList();
     });
   }
@@ -170,19 +172,19 @@ class Lead {
         } else {
           return FirebaseFirestore.instance
               .runTransaction((transaction) async {
-                transaction.update(reference!, toJson());
+                transaction.update(reference, toJson());
                 transaction.update(propertyRef, {'isSold': true});
                 if (staffRef != null) {
                   transaction.update(staffRef!, {'commissionAmount': FieldValue.increment(staffComissionAmount)});
                 }
                 if (agent?.reference != null) {
-                  transaction.update(agent!.reference!, {
+                  transaction.update(agent!.reference, {
                     'commissionAmount': FieldValue.increment(agentComissionAmount),
                     'sharedComissionAmount': FieldValue.increment(superAgentComissionAmount),
                   });
                 }
-                if (agent?.agentReference != null) {
-                  transaction.update(agent!.agentReference!, {'commissionAmount': FieldValue.increment(superAgentComissionAmount)});
+                if (agent?.superAgentReference != null) {
+                  transaction.update(agent!.superAgentReference!, {'commissionAmount': FieldValue.increment(superAgentComissionAmount)});
                 }
                 return transaction;
               })

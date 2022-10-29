@@ -29,13 +29,16 @@ class AgentFormController {
   Agent? superAgent;
   Staff? approvedStaff;
   String? referenceCode;
-  bool isApproved = false;
+  ActiveStatus activeStatus = ActiveStatus.pendingApproval;
+  double commissionAmount = 0.0;
+  double sharedComissionAmount = 0.0;
 
   factory AgentFormController.fromAgent(Agent agent) {
     var controller = AgentFormController();
+    controller._reference = agent.reference;
     controller.referenceCode = agent.referenceCode;
     controller.panCardNumber.text = agent.panCardNumber ?? '';
-    controller.agentReference = agent.agentReference;
+    controller.agentReference = agent.superAgentReference;
     controller.approvedStaffReference = agent.approvedStaffReference;
     controller.phoneNumber.text = agent.phoneNumber;
     controller.firstName.text = agent.firstName;
@@ -52,7 +55,9 @@ class AgentFormController {
     controller.bankName.text = agent.bankName ?? '';
     controller.branch.text = agent.branch ?? '';
     controller.ifscCode.text = agent.ifscCode ?? '';
-    controller.isApproved = agent.isApproved;
+    controller.activeStatus = agent.activeStatus;
+    controller.commissionAmount = agent.commissionAmount;
+    controller.sharedComissionAmount = agent.sharedComissionAmount;
     return controller;
   }
 
@@ -65,9 +70,8 @@ class AgentFormController {
   Agent get agent => Agent(
         referenceCode: referenceCode ?? newReferenceCode,
         panCardNumber: panCardNumber.text,
-        agentReference: agentReference,
+        superAgentReference: agentReference,
         approvedStaffReference: approvedStaffReference,
-        docId: reference.id,
         phoneNumber: phoneNumber.text,
         firstName: firstName.text,
         lastName: lastName.text,
@@ -83,9 +87,11 @@ class AgentFormController {
         bankName: bankName.text,
         branch: branch.text,
         ifscCode: ifscCode.text,
-        isApproved: isApproved,
         approvedStaff: approvedStaff,
         superAgent: superAgent,
         reference: reference,
+        activeStatus: activeStatus,
+        commissionAmount: commissionAmount,
+        sharedComissionAmount: sharedComissionAmount,
       );
 }

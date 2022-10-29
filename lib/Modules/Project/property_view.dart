@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:real_estate_admin/Model/Property.dart';
@@ -310,12 +311,12 @@ class _PropertyViewState extends State<PropertyView> {
                                                   DataCell(Text(e.phoneNumber ?? e.email ?? '')),
                                                   DataCell(Text((e.agent?.firstName ?? '') + (e.agent?.lastName ?? ''))),
                                                   DataCell(
-                                                    DropdownButtonFormField<Staff?>(
-                                                        value: e.staff,
+                                                    DropdownButtonFormField<DocumentReference?>(
+                                                        value: e.staff?.reference,
                                                         items: AppSession()
                                                             .staffs
-                                                            .map((staff) => DropdownMenuItem<Staff?>(
-                                                                  value: staff,
+                                                            .map((staff) => DropdownMenuItem<DocumentReference?>(
+                                                                  value: staff.reference,
                                                                   child: Text(staff.firstName),
                                                                 ))
                                                             .toList(),

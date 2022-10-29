@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:real_estate_admin/Model/Agent.dart';
@@ -189,12 +190,12 @@ class LeadListSourse extends DataTableSource {
         DataCell(Text('${_lead.name}@gmail.com')),
         DataCell(Text(_lead.phoneNumber ?? '')),
         DataCell(
-          DropdownButtonFormField<Staff?>(
-              value: _lead.staff,
+          DropdownButtonFormField<DocumentReference?>(
+              value: _lead.staffRef,
               items: AppSession()
                   .staffs
-                  .map((staff) => DropdownMenuItem<Staff?>(
-                        value: staff,
+                  .map((staff) => DropdownMenuItem<DocumentReference?>(
+                        value: staff.reference,
                         child: Text(staff.firstName),
                       ))
                   .toList(),
@@ -206,7 +207,7 @@ class LeadListSourse extends DataTableSource {
                 }
               }),
         ),
-        DataCell(Text(_lead.agent?.firstName ?? '')),
+        DataCell(Text(AppSession().agents.where((element) => element.reference == _lead.agentRef).first.firstName)),
         DataCell(Text(_lead.enquiryDate.toString().substring(0, 10))),
         DataCell(TextButton(
           onPressed: () {
@@ -260,7 +261,7 @@ class LeadListSourse extends DataTableSource {
               )
             : IconButton(
                 onPressed: () {
-                  _lead.reference!.delete();
+                  _lead.reference.delete();
                 },
                 icon: const Icon(Icons.delete)))
       ],

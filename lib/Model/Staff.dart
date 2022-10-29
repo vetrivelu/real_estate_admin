@@ -18,13 +18,13 @@ class Staff {
   final String? bankName;
   final String? branch;
   final String? ifscCode;
-  final String docId;
   final String email;
   final DocumentReference reference;
+  final bool isAdmin;
 
   Staff({
+    this.isAdmin = false,
     required this.reference,
-    required this.docId,
     required this.phoneNumber,
     required this.firstName,
     this.lastName,
@@ -43,8 +43,8 @@ class Staff {
   });
 
   Map<String, dynamic> toJson() => {
+        'isAdmin': isAdmin,
         "reference": reference,
-        "docId": docId,
         "phoneNumber": phoneNumber,
         "firstName": firstName,
         "lastName": lastName,
@@ -91,8 +91,8 @@ class Staff {
   static Staff fromSnapshot(DocumentSnapshot snapshot) {
     var data = snapshot.data() as Map<String, dynamic>;
     return Staff(
+      isAdmin: data['isAdmin'] ?? false,
       reference: snapshot.reference,
-      docId: data["docId"],
       phoneNumber: data["phoneNumber"],
       firstName: data["firstName"],
       lastName: data["lastName"],
@@ -113,8 +113,8 @@ class Staff {
 
   factory Staff.fromJson(data) {
     return Staff(
+      isAdmin: data['isAdmin'] ?? false,
       reference: data['reference'],
-      docId: data["docId"],
       phoneNumber: data["phoneNumber"],
       firstName: data["firstName"],
       lastName: data["lastName"],

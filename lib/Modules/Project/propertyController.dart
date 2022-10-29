@@ -92,7 +92,7 @@ class PropertyController {
   }
 
   Stream<List<Lead>> getLeads() {
-    return leadsRef.snapshots().map((snapsot) => snapsot.docs.map((e) => Lead.fromJson(e.data())).toList());
+    return leadsRef.snapshots().map((snapsot) => snapsot.docs.map((e) => Lead.fromJson(e.data(), e.reference)).toList());
   }
 
   addLead(Lead lead) {

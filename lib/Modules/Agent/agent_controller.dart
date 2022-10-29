@@ -41,7 +41,7 @@ class AgentController {
         .doc(agent.docId)
         .update(agent.toJson())
         .then((value) => Result(tilte: Result.success, message: "Agent record updated successfully"))
-        .onError((error, stackTrace) => Result(tilte: Result.failure, message: "Agent record update failed"));
+        .onError((error, stackTrace) => Result(tilte: Result.failure, message: "Agent record update failed\n${error.toString()}"));
   }
 
   Future<Result> deleteAgent() {
@@ -57,5 +57,4 @@ class AgentController {
       return value.docs.map((e) => Agent.fromSnapshot(e)).toList();
     });
   }
-
 }

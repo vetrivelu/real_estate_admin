@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:real_estate_admin/Model/Staff.dart';
 
 class StaffFormController {
-  StaffFormController({this.docId});
+  StaffFormController();
   TextEditingController firstName = TextEditingController();
   TextEditingController lastName = TextEditingController();
   TextEditingController phoneNumber = TextEditingController();
@@ -19,26 +19,24 @@ class StaffFormController {
   TextEditingController bankName = TextEditingController();
   TextEditingController branch = TextEditingController();
   TextEditingController ifscCode = TextEditingController();
-  String? docId;
   TextEditingController email = TextEditingController();
   Staff? superAgent;
   Staff? approvedStaff;
+  bool isAdmin = false;
 
   // String get newDocId => FirebaseFirestore.instance.collection('staffs').doc().id;
 
   DocumentReference? _reference;
 
   DocumentReference get reference {
-    if (_reference != null) {
-      _reference = FirebaseFirestore.instance.collection('staffs').doc();
-    }
+    _reference ??= FirebaseFirestore.instance.collection('staffs').doc();
     return _reference!;
   }
 
   Staff get staff => Staff(
         reference: reference,
         panCardNumber: panCardNumber.text,
-        docId: docId ?? reference.id,
+        // docId: docId ?? reference.id,
         phoneNumber: phoneNumber.text,
         firstName: firstName.text,
         lastName: lastName.text,
@@ -53,6 +51,7 @@ class StaffFormController {
         bankName: bankName.text,
         branch: branch.text,
         ifscCode: ifscCode.text,
+        isAdmin: isAdmin,
       );
 
   factory StaffFormController.fromStaff(Staff staff) {
@@ -71,9 +70,9 @@ class StaffFormController {
     controller.bankName.text = staff.bankName ?? '';
     controller.branch.text = staff.branch ?? '';
     controller.ifscCode.text = staff.ifscCode ?? '';
-    controller.docId = staff.docId;
     controller.email.text = staff.email;
     controller._reference = staff.reference;
+    controller.isAdmin = staff.isAdmin;
     return controller;
   }
 }

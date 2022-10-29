@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:real_estate_admin/Model/Agent.dart';
 import 'package:real_estate_admin/Model/Project.dart';
 import 'package:real_estate_admin/Model/Property.dart';
@@ -14,15 +15,18 @@ class AppSession extends ChangeNotifier {
   List<Staff> staffs = [];
   List<Agent> agents = [];
 
+  Staff? staff;
+
   AppSession._internal() {
     firbaseAuth.authStateChanges().listen((event) async {
       if (event != null) {
         staffs = await Staff.getStaffs();
-        FirebaseFirestore.instance
-            .collection('agents')
-            .get()
-            .then((value) => value.docs.map((e) => Agent.fromSnapshot(e)).toList())
-            .then((value) => agents = value);
+
+        FirebaseFirestore.instance.collection('agents').get().then((value) => value.docs.map((e) => Agent.fromSnapshot(e)).toList()).then((value) {
+          agents = value;
+          print(agents.length);
+        });
+        staff = staffs.firstWhereOrNull((element) => element.reference.id == event.uid);
       }
       notifyListeners();
     });
@@ -31,6 +35,7 @@ class AppSession extends ChangeNotifier {
       notifyListeners();
     });
   }
+
   factory AppSession() {
     return _instance;
   }
