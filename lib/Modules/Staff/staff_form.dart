@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:real_estate_admin/Model/Staff.dart';
 import 'package:real_estate_admin/Modules/Staff/staff_controller.dart';
 import 'package:real_estate_admin/Modules/Staff/staff_form_state.dart';
+import 'package:real_estate_admin/Providers/session.dart';
 import 'package:real_estate_admin/widgets/formfield.dart';
 import 'package:real_estate_admin/widgets/future_dialog.dart';
 
@@ -66,23 +67,25 @@ class _StaffFormState extends State<StaffForm> {
                 ),
               ],
             ),
-            Row(
-              children: [
-                Expanded(
-                  child: CheckboxListTile(
-                      title: const Text('Mark as Admin'),
-                      value: controller.isAdmin,
-                      onChanged: (val) {
-                        setState(() {
-                          controller.isAdmin = val ?? controller.isAdmin;
-                        });
-                      }),
-                ),
-                Expanded(
-                  child: Container(),
-                ),
-              ],
-            ),
+            AppSession().isAdmin
+                ? Row(
+                    children: [
+                      Expanded(
+                        child: CheckboxListTile(
+                            title: const Text('Mark as Admin'),
+                            value: controller.isAdmin,
+                            onChanged: (val) {
+                              setState(() {
+                                controller.isAdmin = val ?? controller.isAdmin;
+                              });
+                            }),
+                      ),
+                      Expanded(
+                        child: Container(),
+                      ),
+                    ],
+                  )
+                : Container(),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: SizedBox(

@@ -40,6 +40,8 @@ class AppSession extends ChangeNotifier {
     return _instance;
   }
 
+  bool get isAdmin => AppSession().staff?.isAdmin ?? false;
+
   Property? selectedProperty;
   Project? selectedProject;
 

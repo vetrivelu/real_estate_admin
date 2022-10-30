@@ -19,25 +19,10 @@ class LeadList extends StatefulWidget {
   State<LeadList> createState() => _LeadListState();
 }
 
-final List<String> agentNames = [
-  "ALL",
-  "Yathushanth W.",
-  "Durangan Z.",
-  "Ravithyan F.",
-  "Akshayen E.",
-  "Harshavarthan O.",
-  "Saakeythyan E.",
-  "Vibhushan T.",
-  "Ranesh N.",
-  "Nivas F.",
-];
-
 class _LeadListState extends State<LeadList> {
   Agent? agent;
   Staff? staff;
   bool? convertedLeads = false;
-  String selectedAgent = agentNames.first;
-  String selectedStaff = agentNames.first;
 
   @override
   Widget build(BuildContext context) {
@@ -57,70 +42,79 @@ class _LeadListState extends State<LeadList> {
                   defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                   children: [
                     TableRow(children: [
+                      // TileFormField(
+                      //   controller: from,
+                      //   title: 'FROM DATE',
+                      //   suffix: IconButton(
+                      //     onPressed: () {
+                      //       assignDate(from);
+                      //     },
+                      //     icon: Icon(Icons.calendar_month),
+                      //   ),
+                      // ),
+                      // TileFormField(
+                      //   controller: to,
+                      //   title: 'TO DATE',
+                      //   suffix: GestureDetector(
+                      //     onTap: () {
+                      //       assignDate(to);
+                      //     },
+                      //     child: Icon(Icons.calendar_month),
+                      //   ),
+                      // ),
                       ListTile(
-                        title: const Text("Lead Status"),
+                        title: const Text("STAFF"),
                         subtitle: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: DropdownButtonFormField<bool?>(
-                              items: const [
-                                DropdownMenuItem(
-                                  value: null,
+                          child: DropdownButtonFormField<Staff?>(
+                              value: staff,
+                              items: AppSession()
+                                  .staffs
+                                  .map((staffIterable) => DropdownMenuItem<Staff?>(
+                                        value: staffIterable,
+                                        child: Text(staffIterable.firstName),
+                                      ))
+                                  .followedBy([
+                                const DropdownMenuItem<Staff?>(
                                   child: Text("ALL"),
-                                ),
-                                DropdownMenuItem(
-                                  value: true,
-                                  child: Text("Converted Leads"),
-                                ),
-                                DropdownMenuItem(
-                                  value: false,
-                                  child: Text("Pending"),
-                                ),
-                              ],
-                              value: convertedLeads,
+                                )
+                              ]).toList(),
                               isExpanded: true,
                               decoration: const InputDecoration(border: OutlineInputBorder()),
                               onChanged: (val) {
-                                setState(() {
-                                  convertedLeads = val;
-                                });
+                                if (val != null) {
+                                  setState(() {
+                                    staff = val;
+                                  });
+                                }
                               }),
                         ),
                       ),
                       ListTile(
-                        title: const Text("Assigned To"),
+                        title: const Text("AGENT"),
                         subtitle: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: DropdownButtonFormField<String?>(
-                              value: selectedAgent,
-                              items: agentNames
-                                  .map((e) => DropdownMenuItem<String?>(
-                                        value: e,
-                                        child: Text(e),
+                          child: DropdownButtonFormField<Agent?>(
+                              value: agent,
+                              items: AppSession()
+                                  .agents
+                                  .map((agentIterable) => DropdownMenuItem<Agent?>(
+                                        value: agentIterable,
+                                        child: Text(agentIterable.firstName),
                                       ))
-                                  .toList(),
+                                  .followedBy([
+                                const DropdownMenuItem<Agent?>(
+                                  child: Text("ALL"),
+                                )
+                              ]).toList(),
                               isExpanded: true,
                               decoration: const InputDecoration(border: OutlineInputBorder()),
                               onChanged: (val) {
-                                setState(() {});
-                              }),
-                        ),
-                      ),
-                      ListTile(
-                        title: const Text("Source"),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: DropdownButtonFormField<String?>(
-                              value: selectedStaff,
-                              items: agentNames
-                                  .map((e) => DropdownMenuItem<String?>(
-                                        value: e,
-                                        child: Text(e),
-                                      ))
-                                  .toList(),
-                              isExpanded: true,
-                              decoration: const InputDecoration(border: OutlineInputBorder()),
-                              onChanged: (val) {
-                                setState(() {});
+                                if (val != null) {
+                                  setState(() {
+                                    agent = val;
+                                  });
+                                }
                               }),
                         ),
                       ),
@@ -177,12 +171,25 @@ class LeadListSourse extends DataTableSource {
   final BuildContext context;
   LeadListSourse(this.leads, {required this.context});
 
+  getColor(Lead lead) {
+    switch (lead.leadStatus) {
+      case LeadStatus.lead:
+        return Colors.transparent;
+      case LeadStatus.pendingApproval:
+        return Colors.yellow.shade100;
+      case LeadStatus.sold:
+        return Colors.lightGreen.shade100;
+      default:
+        return Colors.transparent;
+    }
+  }
+
   @override
   DataRow? getRow(int index) {
     final _lead = leads[index];
 
     return DataRow.byIndex(
-      color: MaterialStateProperty.all(_lead.leadStatus == LeadStatus.sold ? Colors.lightGreen.shade100 : Colors.white),
+      color: MaterialStateProperty.all(getColor(_lead)),
       index: index,
       cells: [
         DataCell(Text((index + 1).toString())),
@@ -201,11 +208,13 @@ class LeadListSourse extends DataTableSource {
                   .toList(),
               isExpanded: true,
               decoration: const InputDecoration(border: OutlineInputBorder()),
-              onChanged: (val) {
-                if (val != null) {
-                  _lead.assignStaff(val);
-                }
-              }),
+              onChanged: _lead.leadStatus != LeadStatus.lead
+                  ? null
+                  : (val) {
+                      if (val != null) {
+                        _lead.assignStaff(val);
+                      }
+                    }),
         ),
         DataCell(Text(AppSession().agents.where((element) => element.reference == _lead.agentRef).first.firstName)),
         DataCell(Text(_lead.enquiryDate.toString().substring(0, 10))),
@@ -262,6 +271,7 @@ class LeadListSourse extends DataTableSource {
             : IconButton(
                 onPressed: () {
                   _lead.reference.delete();
+                  _lead.propertyRef.update({'leadCount': FieldValue.increment(-1)});
                 },
                 icon: const Icon(Icons.delete)))
       ],

@@ -181,8 +181,17 @@ class Commission {
 class ComissionController {
   ComissionType comissionType = ComissionType.amount;
   TextEditingController value = TextEditingController(text: '0.00');
-  TextEditingController amount = TextEditingController();
-  TextEditingController owner = TextEditingController();
+
+  ComissionController();
+
+  factory ComissionController.fromComission(Commission? comission) {
+    var controler = ComissionController();
+    if (comission != null) {
+      controler.value.text = comission.value.toString();
+      controler.comissionType = comission.comissionType;
+    }
+    return controler;
+  }
 
   Commission get comission => Commission(comissionType: comissionType, value: double.tryParse(value.text) ?? 0);
 }

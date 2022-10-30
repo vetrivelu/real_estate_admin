@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:real_estate_admin/Model/Lead.dart';
 
 import '../../../Model/Agent.dart';
+import '../../../Model/Property.dart';
 import '../../../Model/Staff.dart';
 // import '../../../Model/staff.dart';
 
@@ -18,6 +19,12 @@ class LeadFormController {
   Agent? agent;
   Staff? staff;
   DocumentReference? _reference;
+  LeadStatus leadStatus = LeadStatus.lead;
+
+  ComissionController staffComission = ComissionController();
+  ComissionController agentComission = ComissionController();
+  ComissionController superAgentComission = ComissionController();
+  final TextEditingController sellingAmount = TextEditingController(text: '0.00');
 
   DocumentReference get reference => _reference ?? propertyRef.collection('leads').doc();
 
@@ -38,6 +45,11 @@ class LeadFormController {
     controller.agent = lead.agent;
     controller.staff = lead.staff;
     controller._reference = lead.reference;
+    controller.agentComission = ComissionController.fromComission(lead.agentComission);
+    controller.staffComission = ComissionController.fromComission(lead.staffComission);
+    controller.superAgentComission = ComissionController.fromComission(lead.superAgentComission);
+    controller.sellingAmount.text = lead.sellingAmount.toString();
+    controller.leadStatus = lead.leadStatus;
     return controller;
   }
 
@@ -54,6 +66,11 @@ class LeadFormController {
       reference: reference,
       staff: staff,
       staffRef: staffRef,
+      agentComission: agentComission.comission,
+      leadStatus: leadStatus,
+      sellingAmount: double.tryParse(sellingAmount.text) ?? 0.0,
+      staffComission: staffComission.comission,
+      superAgentComission: superAgentComission.comission,
     );
   }
 }

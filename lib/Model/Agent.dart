@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
 import 'package:real_estate_admin/Model/Staff.dart';
+import 'package:real_estate_admin/Providers/session.dart';
 
 enum ActiveStatus { pendingApproval, active, blocked }
 
@@ -27,6 +29,7 @@ class Agent {
   Agent? superAgent;
   Staff? approvedStaff;
   ActiveStatus activeStatus;
+
   String referenceCode;
 
   double commissionAmount;
@@ -94,6 +97,7 @@ class Agent {
         'sharedComissionAmount': sharedComissionAmount,
         "search": search,
         "activeStatus": activeStatus.index,
+        "reference": reference,
       };
 
   static List<String> makeSearchstring(String string) {
@@ -117,6 +121,7 @@ class Agent {
     if ((phoneNumber).isNotEmpty) {
       returns.addAll(makeSearchstring(phoneNumber));
     }
+
     return returns;
   }
 
@@ -147,7 +152,7 @@ class Agent {
       // approvedStaff: data['approvedStaff'],
       commissionAmount: data['commissionAmount'] ?? 0,
       sharedComissionAmount: data['sharedComissionAmount'] ?? 0,
-      superAgent: data['superAgent'],
+      superAgent: AppSession().agents.firstWhereOrNull((element) => element.reference == data["superAgentReference"]),
       approvedStaffReference: data["approvedStaffReference"],
     );
   }
@@ -156,7 +161,7 @@ class Agent {
     return Agent(
       sharedComissionAmount: data['sharedComissionAmount'],
       email: data["email"],
-      activeStatus: data['activeStatus'] ?? ActiveStatus.pendingApproval,
+      activeStatus: data['activeStatus'] == null ? ActiveStatus.pendingApproval : ActiveStatus.values.elementAt(data['activeStatus']),
       referenceCode: data["referenceCode"],
       firstName: data["firstName"],
       lastName: data["lastName"],
@@ -176,28 +181,34 @@ class Agent {
       superAgentReference: data["superAgentReference"],
       approvedStaff: data["approvedStaff"],
       commissionAmount: data["commissionAmount"] ?? 0,
-      superAgent: data["superAgent"],
+      superAgent: AppSession().agents.firstWhereOrNull((element) => element.reference == data["superAgentReference"]),
       approvedStaffReference: data["approvedStaffReference"],
       reference: data["reference"],
     );
   }
 
   Future<List<Agent>> getReferrals() async {
-    DocumentReference? superAgentReference = reference;
-    return FirebaseFirestore.instance.collection('agents').where('superAgentReference', isEqualTo: superAgentReference).get().then((value) {
+    return FirebaseFirestore.instance.collection('agents').where('superAgentReference', isEqualTo: reference).get().then((value) {
       return value.docs.map((e) => Agent.fromSnapshot(e)).toList();
     });
   }
 
   Future<void> disable() {
     return FirebaseFirestore.instance.collection('agents').doc(docId).update({
-      "activeStatus": ActiveStatus.blocked,
+      "activeStatus": ActiveStatus.blocked.index,
     });
   }
 
   Future<void> enable() {
     return FirebaseFirestore.instance.collection('agents').doc(docId).update({
-      "activeStatus": ActiveStatus.active,
+      "activeStatus": ActiveStatus.active.index,
+    });
+  }
+
+  Future<void> approve() {
+    return FirebaseFirestore.instance.collection('agents').doc(docId).update({
+      "approvedStaffReference": AppSession().staff?.reference,
+      "activeStatus": ActiveStatus.active.index,
     });
   }
 }

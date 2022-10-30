@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:real_estate_admin/Model/Agent.dart';
 import 'package:real_estate_admin/Modules/Agent/agent_form.dart';
+import 'package:real_estate_admin/Modules/Agent/agent_screen.dart';
 import 'package:real_estate_admin/widgets/formfield.dart';
 
 class AgentList extends StatefulWidget {
@@ -153,7 +154,18 @@ class _AgentListState extends State<AgentList> {
                               rows: agents
                                   .map((e) => DataRow(
                                         cells: [
-                                          DataCell(TextButton(onPressed: () {}, child: Text("${e.firstName} ${e.lastName}"))),
+                                          DataCell(TextButton(
+                                              onPressed: () {
+                                                showDialog(
+                                                    context: context,
+                                                    builder: (context) {
+                                                      return AlertDialog(
+                                                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                                                        content: SizedBox(height: 800, width: 600, child: AgentScreen(agent: e)),
+                                                      );
+                                                    });
+                                              },
+                                              child: Text("${e.firstName} ${e.lastName}"))),
                                           DataCell(Text(e.phoneNumber)),
                                           DataCell(Text(e.panCardNumber ?? '')),
                                           DataCell(Text(e.email ?? '')),
@@ -177,9 +189,8 @@ class _AgentListState extends State<AgentList> {
                                                     });
                                               },
                                               icon: const Icon(Icons.edit))),
-                                          DataCell(!(e.activeStatus == ActiveStatus.pendingApproval)
-                                              ? TextButton(onPressed: e.enable, child: const Text("ENABLE"))
-                                              : TextButton(
+                                          DataCell((e.activeStatus == ActiveStatus.active)
+                                              ? TextButton(
                                                   onPressed: () {
                                                     showDialog(
                                                         context: context,
@@ -201,7 +212,10 @@ class _AgentListState extends State<AgentList> {
                                                           );
                                                         });
                                                   },
-                                                  child: const Text("DISABLE"))),
+                                                  child: const Text("BLOCK"))
+                                              : TextButton(
+                                                  onPressed: e.activeStatus == ActiveStatus.pendingApproval ? e.approve : e.enable,
+                                                  child: Text(e.activeStatus == ActiveStatus.pendingApproval ? "APPROVE" : "ACTIVATE"))),
                                         ],
                                       ))
                                   .toList(),

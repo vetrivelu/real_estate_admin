@@ -5,6 +5,7 @@ import 'package:real_estate_admin/Modules/Dashboard/dashboard.dart';
 import 'package:real_estate_admin/Modules/Project/Sales/sale_list.dart';
 import 'package:real_estate_admin/Modules/Project/leads/lead_list.dart';
 import 'package:real_estate_admin/Modules/Project/project_list.dart';
+import 'package:real_estate_admin/Modules/Staff/staff_form.dart';
 import 'package:real_estate_admin/Modules/Staff/staff_list.dart';
 import 'package:real_estate_admin/Providers/session.dart';
 import 'package:real_estate_admin/auth_gate.dart';
@@ -69,18 +70,20 @@ class _HomeState extends State<Home> {
                     Get.offAll(() => const AgentList());
                   },
                 ),
-                ListTile(
-                  selected: selectedTile == 3,
-                  title: const Text("Staffs"),
-                  trailing: const Icon(Icons.people_sharp),
-                  onTap: () {
-                    // session.pageController.jumpToPage(2);
-                    setState(() {
-                      selectedTile = 3;
-                    });
-                    Get.offAll(() => const StaffList());
-                  },
-                ),
+                AppSession().isAdmin
+                    ? ListTile(
+                        selected: selectedTile == 3,
+                        title: const Text("Staffs"),
+                        trailing: const Icon(Icons.people_sharp),
+                        onTap: () {
+                          // session.pageController.jumpToPage(2);
+                          setState(() {
+                            selectedTile = 3;
+                          });
+                          Get.offAll(() => const StaffList());
+                        },
+                      )
+                    : Container(),
                 ListTile(
                   selected: selectedTile == 4,
                   title: const Text("Leads"),
@@ -103,6 +106,20 @@ class _HomeState extends State<Home> {
                       selectedTile = 5;
                     });
                     Get.offAll(() => const SaleList());
+                  },
+                ),
+                ListTile(
+                  title: const Text("My Profile"),
+                  trailing: const Icon(Icons.person),
+                  onTap: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                            content: SizedBox(height: 800, width: 600, child: StaffForm(staff: AppSession().staff)),
+                          );
+                        });
                   },
                 ),
                 ListTile(
