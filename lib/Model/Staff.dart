@@ -21,8 +21,10 @@ class Staff {
   final String email;
   final DocumentReference reference;
   final bool isAdmin;
+  int commissionAmount;
 
   Staff({
+    required this.commissionAmount,
     this.isAdmin = false,
     required this.reference,
     required this.phoneNumber,
@@ -91,6 +93,7 @@ class Staff {
   static Staff fromSnapshot(DocumentSnapshot snapshot) {
     var data = snapshot.data() as Map<String, dynamic>;
     return Staff(
+      commissionAmount: data['commissionAmount'] ?? 0,
       isAdmin: data['isAdmin'] ?? false,
       reference: snapshot.reference,
       phoneNumber: data["phoneNumber"],
@@ -113,6 +116,7 @@ class Staff {
 
   factory Staff.fromJson(data) {
     return Staff(
+      commissionAmount: data['commissionAmount'] ?? 0,
       isAdmin: data['isAdmin'] ?? false,
       reference: data['reference'],
       phoneNumber: data["phoneNumber"],

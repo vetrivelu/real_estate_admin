@@ -115,11 +115,9 @@ class _SaleListState extends State<SaleList> {
                               isExpanded: true,
                               decoration: const InputDecoration(border: OutlineInputBorder()),
                               onChanged: (val) {
-                                if (val != null) {
-                                  setState(() {
-                                    staff = val;
-                                  });
-                                }
+                                setState(() {
+                                  staff = val;
+                                });
                               }),
                         ),
                       ),
@@ -144,12 +142,10 @@ class _SaleListState extends State<SaleList> {
                               isExpanded: true,
                               decoration: const InputDecoration(border: OutlineInputBorder()),
                               onChanged: (val) {
-                                if (val != null) {
-                                  setState(() {
-                                    agent = val;
-                                    print(agent?.toJson());
-                                  });
-                                }
+                                setState(() {
+                                  agent = val;
+                                  print(agent?.toJson());
+                                });
                               }),
                         ),
                       ),
@@ -252,20 +248,23 @@ class SaleListSourse extends DataTableSource {
 
         DataCell(TextButton(
           onPressed: () {
-            showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                    content: SizedBox(
-                      height: 800,
-                      width: 600,
-                      child: PropertyView(
-                        property: AppSession().selectedProperty!,
+            _lead.propertyRef.get().then((value) {
+              var property = Property.fromSnapshot(value);
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                      content: SizedBox(
+                        height: 800,
+                        width: 600,
+                        child: PropertyView(
+                          property: property,
+                        ),
                       ),
-                    ),
-                  );
-                });
+                    );
+                  });
+            });
           },
           child: const Text("Property"),
         )),

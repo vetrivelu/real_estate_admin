@@ -95,7 +95,6 @@ class Property {
     var batch = FirebaseFirestore.instance.batch();
     lead.reference = reference.collection('leads').doc();
     batch.set(lead.reference, lead.toJson());
-    batch.update(lead.propertyRef, {'leadCount': FieldValue.increment(1)});
     return batch.commit().then((value) {
       return Result(tilte: Result.success, message: 'Lead added successfully');
     });

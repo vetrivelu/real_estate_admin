@@ -164,7 +164,14 @@ class Lead {
     }
   }
 
-  static Stream<List<Lead>> getLeads() {
+  static Stream<List<Lead>> getLeads({Agent? agent, Staff? staff}) {
+    var query = FirebaseFirestore.instance.collectionGroup('leads').where('leadStatus', isEqualTo: LeadStatus.lead.index);
+    if (agent != null) {
+      query = query.where('agentRef', isEqualTo: agent.reference);
+    }
+    if (staff != null) {
+      query = query.where('staffRef', isEqualTo: staff.reference);
+    }
     return FirebaseFirestore.instance.collectionGroup('leads').where('leadStatus', isEqualTo: LeadStatus.lead.index).snapshots().map((event) {
       return event.docs.map((e) => Lead.fromSnapshot(e)).toList();
     });

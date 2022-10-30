@@ -39,6 +39,8 @@ class TileFormField extends StatelessWidget {
           onChanged: onChanged,
           controller: controller,
           decoration: InputDecoration(
+            filled: true,
+            fillColor: (enabled ?? true) ? Colors.transparent : Colors.grey.shade300,
             border: const OutlineInputBorder(),
             contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 22),
             suffix: suffix,

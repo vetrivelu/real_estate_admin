@@ -5,6 +5,7 @@ import 'package:real_estate_admin/Model/Agent.dart';
 import 'package:real_estate_admin/Model/Property.dart';
 import 'package:real_estate_admin/Model/Staff.dart';
 import 'package:real_estate_admin/Modules/Project/Sales/sale_form.dart';
+import 'package:real_estate_admin/Modules/Project/leads/lead_form.dart';
 import 'package:real_estate_admin/Modules/Project/property_view.dart';
 import 'package:real_estate_admin/Providers/session.dart';
 
@@ -129,7 +130,7 @@ class _LeadListState extends State<LeadList> {
           Expanded(
             // child: Container(),
             child: StreamBuilder<List<Lead>>(
-                stream: Lead.getLeads(),
+                stream: Lead.getLeads(agent: agent, staff: staff),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return Table(
@@ -264,6 +265,33 @@ class LeadListSourse extends DataTableSource {
             ? const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Icon(
+                  Icons.edit,
+                  color: Colors.grey,
+                ),
+              )
+            : IconButton(
+                onPressed: () async {
+                  Property property = await _lead.propertyRef.get().then((value) => Property.fromSnapshot(value));
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                          content: SizedBox(
+                              height: 800,
+                              width: 600,
+                              child: LeadForm(
+                                lead: _lead,
+                                property: property,
+                              )),
+                        );
+                      });
+                },
+                icon: const Icon(Icons.edit))),
+        DataCell(_lead.leadStatus == LeadStatus.sold
+            ? const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Icon(
                   Icons.delete,
                   color: Colors.grey,
                 ),
@@ -299,6 +327,7 @@ class LeadListSourse extends DataTableSource {
       const DataColumn(label: Text("Enquiry Date")),
       const DataColumn(label: Text("Property")),
       const DataColumn(label: Text("")),
+      const DataColumn(label: Text("Edit")),
       const DataColumn(label: Text("Delete")),
     ]);
     return list;

@@ -23,6 +23,7 @@ class StaffFormController {
   Staff? superAgent;
   Staff? approvedStaff;
   bool isAdmin = false;
+  int commissionAmount = 0;
 
   // String get newDocId => FirebaseFirestore.instance.collection('staffs').doc().id;
 
@@ -34,6 +35,7 @@ class StaffFormController {
   }
 
   Staff get staff => Staff(
+        commissionAmount: commissionAmount,
         reference: reference,
         panCardNumber: panCardNumber.text,
         // docId: docId ?? reference.id,
@@ -73,6 +75,7 @@ class StaffFormController {
     controller.email.text = staff.email;
     controller._reference = staff.reference;
     controller.isAdmin = staff.isAdmin;
+    controller.commissionAmount = staff.commissionAmount;
     return controller;
   }
 }

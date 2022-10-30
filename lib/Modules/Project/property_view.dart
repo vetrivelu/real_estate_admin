@@ -74,7 +74,7 @@ class _PropertyViewState extends State<PropertyView> {
               child: ListView.builder(
                 padding: const EdgeInsets.all(8.0),
                 scrollDirection: Axis.horizontal,
-                itemCount: 10,
+                itemCount: widget.property.photos.length,
                 itemBuilder: (BuildContext context, int index) {
                   var img = widget.property.photos[index];
                   return Padding(
@@ -266,7 +266,7 @@ class _PropertyViewState extends State<PropertyView> {
                                           backgroundColor: Colors.transparent,
                                           context: context,
                                           builder: (context) {
-                                            return Container(
+                                            return SizedBox(
                                               height: Get.height * 0.7,
                                               child: LayoutBuilder(builder: (context, constraints) {
                                                 return Container(
@@ -275,7 +275,12 @@ class _PropertyViewState extends State<PropertyView> {
                                                     alignment: Alignment.centerRight,
                                                     child: ConstrainedBox(
                                                       constraints: constraints.copyWith(maxWidth: constraints.maxWidth / 2),
-                                                      child: LeadForm(property: widget.property),
+                                                      child: Row(
+                                                        children: [
+                                                          Expanded(child: Container()),
+                                                          Expanded(child: LeadForm(property: widget.property)),
+                                                        ],
+                                                      ),
                                                     ),
                                                   ),
                                                 );
@@ -290,66 +295,7 @@ class _PropertyViewState extends State<PropertyView> {
                           const Divider(
                             thickness: 2,
                           ),
-                          Table(
-                            children: [
-                              TableRow(
-                                children: [
-                                  DataTable(
-                                    columns: [
-                                      const DataColumn(label: Text('Name')),
-                                      const DataColumn(label: Text('Contact')),
-                                      const DataColumn(label: Text('Agent')),
-                                      const DataColumn(label: Text('Staff')),
-                                      DataColumn(label: Container()),
-                                    ],
-                                    rows: snapshot.data!
-                                        .map((e) => DataRow(
-                                                color: MaterialStateProperty.all(
-                                                    e.leadStatus == LeadStatus.sold ? Colors.lightGreen.shade100 : Colors.white),
-                                                cells: [
-                                                  DataCell(Text(e.name)),
-                                                  DataCell(Text(e.phoneNumber ?? e.email ?? '')),
-                                                  DataCell(Text((e.agent?.firstName ?? '') + (e.agent?.lastName ?? ''))),
-                                                  DataCell(
-                                                    DropdownButtonFormField<DocumentReference?>(
-                                                        value: e.staff?.reference,
-                                                        items: AppSession()
-                                                            .staffs
-                                                            .map((staff) => DropdownMenuItem<DocumentReference?>(
-                                                                  value: staff.reference,
-                                                                  child: Text(staff.firstName),
-                                                                ))
-                                                            .toList(),
-                                                        isExpanded: true,
-                                                        decoration: const InputDecoration(border: OutlineInputBorder()),
-                                                        onChanged: (val) {
-                                                          if (val != null) {
-                                                            e.assignStaff(val);
-                                                          }
-                                                        }),
-                                                  ),
-                                                  DataCell(Padding(
-                                                    padding: const EdgeInsets.only(right: 16),
-                                                    child: ElevatedButton(
-                                                        onPressed: () {
-                                                          // showDialog(
-                                                          //     context: context,
-                                                          //     builder: (context) {
-                                                          //       return const AlertDialog(
-                                                          //         shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                                                          //         content: SizedBox(height: 800, width: 600, child: SaleForm()),
-                                                          //       );
-                                                          //     });
-                                                        },
-                                                        child: const Text("SELL")),
-                                                  )),
-                                                ]))
-                                        .toList(),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                          getLeadTable(snapshot, context),
                           widget.property.isSold
                               ? Container()
                               : ButtonBar(
@@ -385,6 +331,107 @@ class _PropertyViewState extends State<PropertyView> {
           ],
         ),
       ),
+    );
+  }
+
+  getColor(Lead lead) {
+    switch (lead.leadStatus) {
+      case LeadStatus.lead:
+        return Colors.transparent;
+      case LeadStatus.pendingApproval:
+        return Colors.yellow.shade100;
+      case LeadStatus.sold:
+        return Colors.lightGreen.shade100;
+      default:
+        return Colors.transparent;
+    }
+  }
+
+  Table getLeadTable(AsyncSnapshot<List<Lead>> snapshot, BuildContext context) {
+    return Table(
+      children: [
+        TableRow(
+          children: [
+            DataTable(
+              columns: [
+                const DataColumn(label: Text('Name')),
+                const DataColumn(label: Text('Contact')),
+                const DataColumn(label: Text('Agent')),
+                const DataColumn(label: Text('Staff')),
+                DataColumn(label: Container()),
+              ],
+              rows: snapshot.data!
+                  .map((e) => DataRow(color: MaterialStateProperty.all(getColor(e)), cells: [
+                        DataCell(Text(e.name)),
+                        DataCell(Text(e.phoneNumber ?? e.email ?? '')),
+                        DataCell(Text((e.agent?.firstName ?? '') + (e.agent?.lastName ?? ''))),
+                        DataCell(
+                          DropdownButtonFormField<DocumentReference?>(
+                              value: e.staff?.reference,
+                              items: AppSession()
+                                  .staffs
+                                  .map((staff) => DropdownMenuItem<DocumentReference?>(
+                                        value: staff.reference,
+                                        child: Text(staff.firstName),
+                                      ))
+                                  .toList(),
+                              isExpanded: true,
+                              decoration: const InputDecoration(border: OutlineInputBorder()),
+                              onChanged: e.leadStatus == LeadStatus.sold
+                                  ? null
+                                  : (val) {
+                                      if (val != null) {
+                                        e.assignStaff(val);
+                                      }
+                                    }),
+                        ),
+                        DataCell(Padding(
+                          padding: const EdgeInsets.only(right: 16),
+                          child: ElevatedButton(
+                              onPressed: () {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      if (e.leadStatus == LeadStatus.sold && (AppSession().staff?.isAdmin ?? false) == false) {
+                                        return AlertDialog(
+                                          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                                          title: const Text("Operation Not Allowed"),
+                                          content: const Text("Edit operation on sold transaction is only available for admin"),
+                                          actions: [TextButton(onPressed: Navigator.of(context).pop, child: const Text("Okay"))],
+                                        );
+                                      }
+                                      if (e.leadStatus == LeadStatus.pendingApproval) {
+                                        return AlertDialog(
+                                          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                                          content: SizedBox(
+                                              height: 800,
+                                              width: 600,
+                                              child: SaleForm(
+                                                lead: e,
+                                              )),
+                                        );
+                                      } else {
+                                        return AlertDialog(
+                                          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                                          content: SizedBox(
+                                              height: 800,
+                                              width: 600,
+                                              child: LeadForm(
+                                                lead: e,
+                                                property: widget.property,
+                                              )),
+                                        );
+                                      }
+                                    });
+                              },
+                              child: const Text("EDIT")),
+                        )),
+                      ]))
+                  .toList(),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
