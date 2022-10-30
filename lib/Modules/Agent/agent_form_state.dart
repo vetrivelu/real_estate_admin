@@ -32,6 +32,8 @@ class AgentFormController {
   ActiveStatus activeStatus = ActiveStatus.pendingApproval;
   double commissionAmount = 0.0;
   double sharedComissionAmount = 0.0;
+  int leadCount = 0;
+  int successfullLeadCount = 0;
 
   factory AgentFormController.fromAgent(Agent agent) {
     var controller = AgentFormController();
@@ -58,6 +60,8 @@ class AgentFormController {
     controller.activeStatus = agent.activeStatus;
     controller.commissionAmount = agent.commissionAmount;
     controller.sharedComissionAmount = agent.sharedComissionAmount;
+    controller.leadCount = agent.leadCount;
+    controller.successfullLeadCount = agent.successfullLeadCount;
     return controller;
   }
 
@@ -68,6 +72,8 @@ class AgentFormController {
   }
 
   Agent get agent => Agent(
+        successfullLeadCount: agent.successfullLeadCount,
+        leadCount: agent.leadCount,
         referenceCode: referenceCode ?? newReferenceCode,
         panCardNumber: panCardNumber.text,
         superAgentReference: agentReference,

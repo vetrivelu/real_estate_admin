@@ -6,6 +6,8 @@ import 'package:real_estate_admin/Providers/session.dart';
 enum ActiveStatus { pendingApproval, active, blocked }
 
 class Agent {
+  int leadCount;
+  int successfullLeadCount;
   String firstName;
   String? lastName;
   String phoneNumber;
@@ -45,6 +47,8 @@ class Agent {
   }
 
   Agent({
+    required this.leadCount,
+    required this.successfullLeadCount,
     required this.referenceCode,
     this.panCardNumber,
     this.superAgentReference,
@@ -73,6 +77,8 @@ class Agent {
   });
 
   Map<String, dynamic> toJson() => {
+        'successfullLeadCount': successfullLeadCount,
+        'leadCount': leadCount,
         "referenceCode": referenceCode,
         "firstName": firstName,
         "lastName": lastName,
@@ -128,6 +134,8 @@ class Agent {
   static Agent fromSnapshot(DocumentSnapshot snapshot) {
     var data = snapshot.data() as Map<String, dynamic>;
     return Agent(
+      successfullLeadCount: data['successfullLeadCount'] ?? 0,
+      leadCount: data['leadCount'] ?? 0,
       approvedStaff: data['approvedStaff'],
       reference: snapshot.reference,
       email: data["email"],
@@ -159,6 +167,8 @@ class Agent {
 
   factory Agent.fromJson(Map<String, dynamic> data) {
     return Agent(
+      successfullLeadCount: data['successfullLeadCount'] ?? 0,
+      leadCount: data['leadCount'] ?? 0,
       sharedComissionAmount: data['sharedComissionAmount'],
       email: data["email"],
       activeStatus: data['activeStatus'] == null ? ActiveStatus.pendingApproval : ActiveStatus.values.elementAt(data['activeStatus']),
