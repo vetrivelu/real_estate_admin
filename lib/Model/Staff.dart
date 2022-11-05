@@ -22,8 +22,12 @@ class Staff {
   final DocumentReference reference;
   final bool isAdmin;
   int commissionAmount;
+  int leadCount;
+  int successfullLeadCount;
 
   Staff({
+    required this.leadCount,
+    required this.successfullLeadCount,
     required this.commissionAmount,
     this.isAdmin = false,
     required this.reference,
@@ -45,6 +49,8 @@ class Staff {
   });
 
   Map<String, dynamic> toJson() => {
+        'successfullLeadCount': successfullLeadCount,
+        'leadCount': leadCount,
         'isAdmin': isAdmin,
         "reference": reference,
         "phoneNumber": phoneNumber,
@@ -93,6 +99,8 @@ class Staff {
   static Staff fromSnapshot(DocumentSnapshot snapshot) {
     var data = snapshot.data() as Map<String, dynamic>;
     return Staff(
+      successfullLeadCount: data['successfullLeadCount'] ?? 0,
+      leadCount: data['leadCount'] ?? 0,
       commissionAmount: data['commissionAmount'] ?? 0,
       isAdmin: data['isAdmin'] ?? false,
       reference: snapshot.reference,
@@ -116,6 +124,8 @@ class Staff {
 
   factory Staff.fromJson(data) {
     return Staff(
+      successfullLeadCount: data['successfullLeadCount'] ?? 0,
+      leadCount: data['leadCount'] ?? 0,
       commissionAmount: data['commissionAmount'] ?? 0,
       isAdmin: data['isAdmin'] ?? false,
       reference: data['reference'],

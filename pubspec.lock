@@ -99,6 +99,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.7"
+  currency_textfield:
+    dependency: "direct main"
+    description:
+      name: currency_textfield
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0"
   desktop_webview_auth:
     dependency: transitive
     description:

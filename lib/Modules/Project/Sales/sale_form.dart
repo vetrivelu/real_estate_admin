@@ -231,6 +231,20 @@ class _SaleFormState extends State<SaleForm> {
                 ),
                 Expanded(
                   child: TileFormField(
+                    validator: (val) {
+                      if (val != null) {
+                        if (double.tryParse(val) != null) {
+                          return 'Please enter a valid amount';
+                        } else {
+                          var number = double.tryParse(val) ?? 0;
+                          if (property != null) {
+                            if (property!.propertyAmount < number) {
+                              return 'Selling amount is less than property amount';
+                            }
+                          }
+                        }
+                      }
+                    },
                     controller: sellingAmount,
                     title: "Selling Amount",
                     onChanged: (val) {

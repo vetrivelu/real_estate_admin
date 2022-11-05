@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:real_estate_admin/Modules/Project/text_editing_controller.dart';
 import '../../Model/Lead.dart';
 import '../../Model/Property.dart';
 import 'package:image_picker_web/image_picker_web.dart';
@@ -17,7 +18,7 @@ class PropertyViewModel extends ChangeNotifier {
   final taluk = TextEditingController();
   final features = TextEditingController();
   final description = TextEditingController();
-  final propertyAmount = TextEditingController();
+  final propertyAmount = CurrencyTextFieldController(rightSymbol: 'Rs. ', decimalSymbol: '.', thousandSymbol: ',');
   var agentComission = Commission();
   var superAgentComission = Commission();
   var staffComission = Commission();
@@ -84,7 +85,7 @@ class PropertyViewModel extends ChangeNotifier {
         description: description.text,
         coverPhoto: coverPhoto,
         photos: photos,
-        propertyAmount: double.tryParse(propertyAmount.text) ?? 0,
+        propertyAmount: propertyAmount.doubleValue,
         comissionType: comissionType,
         agentComission: agentComission,
         superAgentComission: superAgentComission,

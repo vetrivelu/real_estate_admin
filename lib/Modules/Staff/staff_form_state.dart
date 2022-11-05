@@ -34,7 +34,12 @@ class StaffFormController {
     return _reference!;
   }
 
+  int leadCount = 0;
+  int successfullLeadCount = 0;
+
   Staff get staff => Staff(
+        successfullLeadCount: successfullLeadCount,
+        leadCount: leadCount,
         commissionAmount: commissionAmount,
         reference: reference,
         panCardNumber: panCardNumber.text,
@@ -76,6 +81,8 @@ class StaffFormController {
     controller._reference = staff.reference;
     controller.isAdmin = staff.isAdmin;
     controller.commissionAmount = staff.commissionAmount;
+    controller.leadCount = staff.leadCount;
+    controller.successfullLeadCount = staff.successfullLeadCount;
     return controller;
   }
 }

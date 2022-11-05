@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -39,17 +41,30 @@ class AppSession extends ChangeNotifier {
   factory AppSession() {
     return _instance;
   }
-
-  bool get isAdmin => AppSession().staff?.isAdmin ?? false;
+  bool? _isAdmin;
+  bool get isAdmin => _isAdmin ?? AppSession().staff?.isAdmin ?? false;
 
   Property? selectedProperty;
   Project? selectedProject;
 
+  Future<bool> checkAdmin() async {
+    if (firbaseAuth.currentUser != null) {
+      return firbaseAuth.currentUser!.getIdTokenResult().then((value) {
+        if (value.claims!.keys.contains('isAdmin')) {
+          _isAdmin = value.claims!['isAdmin'];
+          return _isAdmin ?? false;
+        }
+        return false;
+      });
+    }
+    return false;
+  }
+
   Future<Result> signIn({required String email, required String password}) {
-    return firbaseAuth
-        .signInWithEmailAndPassword(email: email, password: password)
-        .then((value) => Result(tilte: Result.success, message: "Logged in sucessfully"))
-        .onError((error, stackTrace) => Result(tilte: Result.failure, message: error.toString()));
+    return firbaseAuth.signInWithEmailAndPassword(email: email, password: password).then((value) {
+      checkAdmin();
+      return Result(tilte: Result.success, message: "Logged in sucessfully");
+    }).onError((error, stackTrace) => Result(tilte: Result.failure, message: error.toString()));
   }
 
   final PageController pageController = PageController(initialPage: 1);

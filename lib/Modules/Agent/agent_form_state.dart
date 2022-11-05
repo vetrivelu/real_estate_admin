@@ -72,8 +72,8 @@ class AgentFormController {
   }
 
   Agent get agent => Agent(
-        successfullLeadCount: agent.successfullLeadCount,
-        leadCount: agent.leadCount,
+        successfullLeadCount: successfullLeadCount,
+        leadCount: leadCount,
         referenceCode: referenceCode ?? newReferenceCode,
         panCardNumber: panCardNumber.text,
         superAgentReference: agentReference,

@@ -42,17 +42,22 @@ class AuthGate extends StatelessWidget {
       builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
         if (snapshot.connectionState == ConnectionState.active) {
           if (snapshot.hasData) {
-            return Consumer(
-              builder: ((context, value, child) {
-                return GetMaterialApp(
-                  defaultTransition: Transition.noTransition,
-                  home: Container(),
-                  builder: (context, child) {
-                    return Home(child: child!);
-                  },
-                );
-              }),
-            );
+            return StatefulBuilder(builder: (context, reload) {
+              AppSession().checkAdmin().then((val) {
+                reload(() {});
+              });
+              return Consumer(
+                builder: ((context, value, child) {
+                  return GetMaterialApp(
+                    defaultTransition: Transition.noTransition,
+                    home: Container(),
+                    builder: (context, child) {
+                      return Home(child: child!);
+                    },
+                  );
+                }),
+              );
+            });
           } else {
             return const LoginScreen();
           }

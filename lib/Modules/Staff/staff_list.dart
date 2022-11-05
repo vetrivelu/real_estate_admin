@@ -77,6 +77,9 @@ class _StaffListState extends State<StaffList> {
                               DataColumn(label: Text('Phone')),
                               DataColumn(label: Text('PAN')),
                               DataColumn(label: Text('Email')),
+                              DataColumn(label: Text('Comission Earned')),
+                              DataColumn(label: Text('Lead count')),
+                              DataColumn(label: Text('Converted LeadCount')),
                               DataColumn(label: Text('Edit')),
                               DataColumn(label: Text('Delete')),
                             ],
@@ -87,6 +90,9 @@ class _StaffListState extends State<StaffList> {
                                         DataCell(Text(e.phoneNumber)),
                                         DataCell(Text(e.panCardNumber ?? '')),
                                         DataCell(Text(e.email)),
+                                        DataCell(Text(e.commissionAmount.toString())),
+                                        DataCell(Text(e.leadCount.toString())),
+                                        DataCell(Text(e.successfullLeadCount.toString())),
                                         DataCell(IconButton(
                                             onPressed: () {
                                               Get.to(() => StaffForm(

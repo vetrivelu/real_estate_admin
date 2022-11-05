@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:real_estate_admin/Model/Result.dart';
 import 'package:real_estate_admin/Modules/Project/propertyController.dart';
+import 'package:real_estate_admin/widgets/utils.dart';
 
 import '../../Model/Project.dart';
 import '../../Model/Property.dart';
@@ -21,66 +22,7 @@ class PropertyForm extends StatefulWidget {
 }
 
 class _PropertyFormState extends State<PropertyForm> {
-  Widget getComissionTile({required final Commission comission, required String title}) {
-    final TextEditingController controller = TextEditingController();
-    return SizedBox(
-      height: 60,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Expanded(
-            child: ListTile(
-              title: Text(title),
-              subtitle: TextFormField(
-                controller: controller,
-                keyboardType: TextInputType.number,
-                onChanged: (text) {
-                  comission.value = double.tryParse(text) ?? comission.value;
-                  print(comission.value);
-                },
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 100,
-            child: ListTile(
-              title: const Text('In Amount'),
-              subtitle: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Radio<ComissionType>(
-                  value: ComissionType.amount,
-                  groupValue: comission.comissionType,
-                  onChanged: (val) {
-                    setState(() {
-                      comission.comissionType = val ?? comission.comissionType;
-                    });
-                  },
-                ),
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 100,
-            child: ListTile(
-              title: const Text("In Percent"),
-              subtitle: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Radio<ComissionType>(
-                  value: ComissionType.percent,
-                  groupValue: comission.comissionType,
-                  onChanged: (val) {
-                    setState(() {
-                      comission.comissionType = val ?? comission.comissionType;
-                    });
-                  },
-                ),
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
+  final _formKey = GlobalKey<FormState>();
 
   Widget getCoverImage(PropertyViewModel data) {
     if (data.coverPhototData != null) {
@@ -98,7 +40,11 @@ class _PropertyFormState extends State<PropertyForm> {
                 child: Align(
                   alignment: Alignment.topRight,
                   child: IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        data.coverPhototData = null;
+                      });
+                    },
                     icon: const Icon(
                       Icons.close,
                       color: Colors.white,
@@ -110,7 +56,30 @@ class _PropertyFormState extends State<PropertyForm> {
       );
     }
     if ((data.coverPhoto ?? '').isNotEmpty) {
-      return Image.network(data.coverPhoto!);
+      return Stack(
+        children: [
+          Image.network(data.coverPhoto!),
+          Positioned.fill(
+            child: Container(
+                color: Colors.black.withOpacity(0.1),
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        data.deletedPhotos.add(data.coverPhoto);
+                        data.coverPhoto = null;
+                      });
+                    },
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                    ),
+                  ),
+                )),
+          ),
+        ],
+      );
     }
     return GestureDetector(
       onTap: () {
@@ -184,97 +153,119 @@ class _PropertyFormState extends State<PropertyForm> {
             elevation: 0,
           ),
           body: SingleChildScrollView(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Card(child: AspectRatio(aspectRatio: 16 / 9, child: getCoverImage(data))),
-                ),
-                TileFormField(controller: data.title, title: "Title"),
-                Row(
-                  children: [
-                    Expanded(
-                        child: TileFormField(
-                      controller: data.plotNumber,
-                      title: 'Plot Number',
-                    )),
-                    Expanded(
-                        child: TileFormField(
-                      controller: data.surveyNumber,
-                      title: 'Survey / Patta Number',
-                    ))
-                  ],
-                ),
-                TileFormField(controller: data.dtcpNumber, title: 'DTLP Number'),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TileFormField(controller: data.district, title: 'District'),
-                    ),
-                    Expanded(
-                      child: TileFormField(
-                        controller: data.taluk,
-                        title: 'Taluk',
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Card(child: AspectRatio(aspectRatio: 16 / 9, child: getCoverImage(data))),
+                  ),
+                  TileFormField(controller: data.title, title: "Title", validator: requiredValidator),
+                  Row(
+                    children: [
+                      Expanded(
+                          child: TileFormField(
+                        controller: data.plotNumber,
+                        title: 'Plot Number',
+                      )),
+                      Expanded(
+                          child: TileFormField(
+                        controller: data.surveyNumber,
+                        title: 'Survey / Patta Number',
+                      ))
+                    ],
+                  ),
+                  TileFormField(controller: data.dtcpNumber, title: 'DTLP Number'),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TileFormField(controller: data.district, title: 'District'),
                       ),
-                    )
-                  ],
-                ),
-                TileFormField(
-                  controller: data.features,
-                  title: 'Features',
-                  maxLines: 8,
-                ),
-                TileFormField(
-                  controller: data.description,
-                  title: 'Description',
-                  maxLines: 8,
-                ),
-                TileFormField(
-                  controller: data.propertyAmount,
-                  title: 'Property Value',
-                  keyboardType: TextInputType.number,
-                ),
-                const Divider(),
-                ListTile(
-                  title: const Text("Supporting Documents"),
-                  subtitle: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: SizedBox(
-                        height: 130,
-                        child: Row(
-                          children: getPhotoTiles(data),
+                      Expanded(
+                        child: TileFormField(
+                          controller: data.taluk,
+                          title: 'Taluk',
+                        ),
+                      )
+                    ],
+                  ),
+                  TileFormField(
+                    controller: data.features,
+                    title: 'Features',
+                    maxLines: 8,
+                  ),
+                  TileFormField(
+                    controller: data.description,
+                    title: 'Description',
+                    maxLines: 8,
+                  ),
+                  TileFormField(
+                    controller: data.propertyAmount,
+                    title: 'Property Value',
+                    keyboardType: TextInputType.number,
+                    validator: (p0) {
+                      var required = requiredValidator(p0);
+                      if (required != null) {
+                        return required;
+                      } else {
+                        var plainText = p0?.replaceAll(",", "");
+                        if (plainText != null) {
+                          var num = double.tryParse(plainText);
+                          if (num == null) {
+                            return 'Please enter a valid number';
+                          }
+                        }
+                      }
+                    },
+                  ),
+                  const Divider(),
+                  ListTile(
+                    title: const Text("Supporting Documents"),
+                    subtitle: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: SizedBox(
+                          height: 130,
+                          child: Row(
+                            children: getPhotoTiles(data),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                // ListTile(
-                //   title: const Text("Comission Details"),
-                //   subtitle: SizedBox(height: 60, child: getComissionTile(comission: data.staffComission, title: 'Staff commission')),
-                // ),
-                // getComissionTile(comission: data.staffComission, title: 'Staff comission'),
-                // getComissionTile(comission: data.staffComission, title: 'Staff Commission'),
-                Container(
-                  height: 60,
-                  width: double.maxFinite,
-                  margin: const EdgeInsets.all(16),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      var propertyController = PropertyController(propertyFormData: data, project: widget.project);
-                      Future<Result> future;
-                      if (widget.property != null) {
-                        future = propertyController.updateProperty();
-                      } else {
-                        future = propertyController.addProperty();
-                      }
-                      showFutureDialog(context, future: future);
-                    },
-                    child: const Text("SAVE PROPERTY"),
-                  ),
-                )
-              ],
+                  // ListTile(
+                  //   title: const Text("Comission Details"),
+                  //   subtitle: SizedBox(height: 60, child: getComissionTile(comission: data.staffComission, title: 'Staff commission')),
+                  // ),
+                  // getComissionTile(comission: data.staffComission, title: 'Staff comission'),
+                  // getComissionTile(comission: data.staffComission, title: 'Staff Commission'),
+                  Container(
+                    height: 60,
+                    width: double.maxFinite,
+                    margin: const EdgeInsets.all(16),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          var propertyController = PropertyController(propertyFormData: data, project: widget.project);
+                          Future<Result> future;
+                          if (widget.property != null) {
+                            future = propertyController.updateProperty();
+                          } else {
+                            future = propertyController.addProperty();
+                          }
+                          showFutureDialog(context, future: future, onSucess: (val) {
+                            Navigator.of(context).pop();
+                            Navigator.of(context).pop();
+                          });
+                        }
+                      },
+                      child: const Text("SAVE PROPERTY"),
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         );

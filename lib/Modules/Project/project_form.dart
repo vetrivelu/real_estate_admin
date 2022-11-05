@@ -149,17 +149,19 @@ class ProjectForm extends StatelessWidget {
                   margin: const EdgeInsets.all(16),
                   child: ElevatedButton(
                     onPressed: () {
-                      var projectController = ProjectController(controller);
+                      if (_formKey.currentState!.validate()) {
+                        var projectController = ProjectController(controller);
 
-                      var future = (project == null) ? projectController.addProject() : projectController.updateProject();
-                      showFutureDialog(
-                        context,
-                        future: future,
-                        onSucess: (result) {
-                          Navigator.of(context).pop();
-                          if (result is Project) {}
-                        },
-                      );
+                        var future = (project == null) ? projectController.addProject() : projectController.updateProject();
+                        showFutureDialog(
+                          context,
+                          future: future,
+                          onSucess: (result) {
+                            Navigator.of(context).pop();
+                            if (result is Project) {}
+                          },
+                        );
+                      }
                     },
                     child: const Text("SAVE PROJECT"),
                   ),

@@ -14,18 +14,17 @@ showFutureDialog(
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.active || snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasData) {
-                  if (snapshot.data!.tilte == Result.success) {
-                    if (onSucess != null) {
-                      onSucess(snapshot.data!.data);
-                    }
-                  }
                   return AlertDialog(
                     title: Text(snapshot.data!.tilte),
                     content: Text(snapshot.data!.message),
                     actions: [
                       TextButton(
                           onPressed: () {
-                            Navigator.of(context).pop();
+                            if (onSucess != null && snapshot.data?.tilte == Result.success) {
+                              onSucess(snapshot.data!.data);
+                            } else {
+                              Navigator.of(context).pop();
+                            }
                           },
                           child: const Text("OKAY"))
                     ],

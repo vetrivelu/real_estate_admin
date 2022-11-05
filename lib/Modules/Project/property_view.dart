@@ -256,61 +256,43 @@ class _PropertyViewState extends State<PropertyView> {
                                 ),
                               ),
                               Expanded(child: Container()),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                child: ElevatedButton(
-                                    onPressed: () {
-                                      showModalBottomSheet(
-                                          isScrollControlled: true,
-                                          constraints: BoxConstraints(maxWidth: double.maxFinite / 2, minHeight: Get.height * 0.8),
-                                          backgroundColor: Colors.transparent,
-                                          context: context,
-                                          builder: (context) {
-                                            return SizedBox(
-                                              height: Get.height * 0.7,
-                                              child: LayoutBuilder(builder: (context, constraints) {
-                                                return Container(
-                                                  color: Colors.transparent,
-                                                  child: Align(
-                                                    alignment: Alignment.centerRight,
-                                                    child: ConstrainedBox(
-                                                      constraints: constraints.copyWith(maxWidth: constraints.maxWidth / 2),
-                                                      child: Row(
-                                                        children: [
-                                                          Expanded(child: Container()),
-                                                          Expanded(child: LeadForm(property: widget.property)),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-                                                );
-                                              }),
-                                            );
-                                          });
-                                    },
-                                    child: const Text('Add Lead')),
-                              )
+                              widget.property.isSold
+                                  ? Container()
+                                  : Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                                      child: ElevatedButton(
+                                          onPressed: () {
+                                            showModalBottomSheet(
+                                                isScrollControlled: true,
+                                                constraints: BoxConstraints(maxWidth: double.maxFinite / 2, minHeight: Get.height * 0.8),
+                                                backgroundColor: Colors.transparent,
+                                                context: context,
+                                                builder: (context) {
+                                                  return SizedBox(
+                                                    height: Get.height * 0.7,
+                                                    child: LayoutBuilder(builder: (context, constraints) {
+                                                      return Container(
+                                                        color: Colors.transparent,
+                                                        child: Align(
+                                                          alignment: Alignment.centerRight,
+                                                          child: ConstrainedBox(
+                                                            constraints: constraints.copyWith(maxWidth: constraints.maxWidth / 2),
+                                                            child: LeadForm(property: widget.property),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }),
+                                                  );
+                                                });
+                                          },
+                                          child: const Text('Add Lead')),
+                                    )
                             ],
                           ),
                           const Divider(
                             thickness: 2,
                           ),
                           getLeadTable(snapshot, context),
-                          widget.property.isSold
-                              ? Container()
-                              : ButtonBar(
-                                  children: [
-                                    ElevatedButton(
-                                        onPressed: () {
-                                          showModalBottomSheet(
-                                              context: context,
-                                              builder: (context) {
-                                                return LeadForm(property: widget.property);
-                                              });
-                                        },
-                                        child: const Text('Add Lead'))
-                                  ],
-                                ),
                         ],
                       );
                     }
@@ -364,10 +346,11 @@ class _PropertyViewState extends State<PropertyView> {
                   .map((e) => DataRow(color: MaterialStateProperty.all(getColor(e)), cells: [
                         DataCell(Text(e.name)),
                         DataCell(Text(e.phoneNumber ?? e.email ?? '')),
-                        DataCell(Text((e.agent?.firstName ?? '') + (e.agent?.lastName ?? ''))),
+                        DataCell(Text(
+                            AppSession().agents.firstWhereOrNull((element) => element.reference == e.reference)?.firstName ?? "Agent not found")),
                         DataCell(
                           DropdownButtonFormField<DocumentReference?>(
-                              value: e.staff?.reference,
+                              value: e.staffRef,
                               items: AppSession()
                                   .staffs
                                   .map((staff) => DropdownMenuItem<DocumentReference?>(

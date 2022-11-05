@@ -1,12 +1,15 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:real_estate_admin/Model/Project.dart';
 import 'package:real_estate_admin/Model/Property.dart';
+import 'package:real_estate_admin/Model/Result.dart';
 import 'package:real_estate_admin/Modules/Project/project_controller.dart';
 import 'package:real_estate_admin/Modules/Project/project_form_data.dart';
 import 'package:real_estate_admin/Modules/Project/property_form.dart';
 import 'package:real_estate_admin/Modules/Project/property_view.dart';
 import 'package:real_estate_admin/widgets/formfield.dart';
+import 'package:real_estate_admin/widgets/future_dialog.dart';
 
 class PropertyList extends StatefulWidget {
   const PropertyList({Key? key, required this.project}) : super(key: key);
@@ -238,7 +241,15 @@ class PropertyTile extends StatelessWidget {
                   children: [
                     TextButton(
                         onPressed: () {
-                          projectController.deleteProject();
+                          var future =
+                              property.reference.delete().then((value) => Result.completed("Property Deleted Successfully")).onError((error, stcak) {
+                            if (error is FirebaseException) {
+                              return Result(tilte: error.code, message: error.message ?? '');
+                            } else {
+                              return Result(tilte: 'Failed', message: error.toString());
+                            }
+                          });
+                          showFutureDialog(context, future: future);
                         },
                         child: const Text("DELETE")),
                     TextButton(
