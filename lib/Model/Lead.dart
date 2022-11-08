@@ -26,13 +26,18 @@ class Lead {
   Commission? superAgentComission;
 
   DocumentReference reference;
-
+  Property? parentProperty;
+  int propertyID;
   DocumentReference get propertyRef => FirebaseFirestore.instance.doc(reference.path.split('/leads').first);
 
   Agent? agent;
   Staff? staff;
+  DateTime? soldOn;
 
   Lead({
+    this.soldOn,
+    required this.propertyID,
+    this.parentProperty,
     this.sellingAmount,
     this.staffComission,
     this.agentComission,
@@ -66,6 +71,7 @@ class Lead {
   }
 
   toJson() => {
+        "soldOn": soldOn,
         "name": name,
         "phoneNumber": phoneNumber,
         "address": address,
@@ -85,9 +91,13 @@ class Lead {
         "staffComissionAmount": staffComissionAmount,
         "agentComissionAmount": agentComissionAmount,
         "superAgentComissionAmount": superAgentComissionAmount,
+        'propertyID': propertyID,
       };
   factory Lead.fromJson(json, DocumentReference reference) {
     return Lead(
+      soldOn: json["soldOn"],
+      propertyID: json['propertyID'],
+      parentProperty: json['parentProperty'],
       name: json["name"],
       phoneNumber: json["phoneNumber"],
       address: json["address"],
@@ -109,6 +119,9 @@ class Lead {
   factory Lead.fromSnapshot(DocumentSnapshot<Map<String, dynamic>> snapshot) {
     Map<String, dynamic> json = snapshot.data()!;
     return Lead(
+      soldOn: json["soldOn"],
+      propertyID: json['propertyID'],
+      parentProperty: json['parentProperty'],
       name: json["name"],
       phoneNumber: json["phoneNumber"],
       address: json["address"],
@@ -167,12 +180,14 @@ class Lead {
   static Stream<List<Lead>> getLeads({Agent? agent, Staff? staff}) {
     var query = FirebaseFirestore.instance.collectionGroup('leads').where('leadStatus', isEqualTo: LeadStatus.lead.index);
     if (agent != null) {
+      print(agent.reference);
       query = query.where('agentRef', isEqualTo: agent.reference);
     }
     if (staff != null) {
+      print(staff.reference);
       query = query.where('staffRef', isEqualTo: staff.reference);
     }
-    return FirebaseFirestore.instance.collectionGroup('leads').where('leadStatus', isEqualTo: LeadStatus.lead.index).snapshots().map((event) {
+    return query.snapshots().map((event) {
       return event.docs.map((e) => Lead.fromSnapshot(e)).toList();
     });
   }

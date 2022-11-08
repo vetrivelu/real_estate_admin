@@ -1,9 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:real_estate_admin/Model/Agent.dart';
+import 'package:real_estate_admin/Model/Property.dart';
+import 'package:real_estate_admin/Providers/session.dart';
 
 import '../../Model/Lead.dart';
+import '../Project/Sales/sale_form.dart';
+import '../Project/leads/lead_form.dart';
 
 class AgentLeads extends StatefulWidget {
   const AgentLeads({Key? key, required this.agent}) : super(key: key);
@@ -27,144 +32,182 @@ class _LeadListState extends State<AgentLeads> {
     });
   }
 
+  Future<List<Property>> getProperties() async {
+    List<Property> properties = [];
+    List<Lead> leads = await getLeads();
+    print(leads.length);
+    Set<DocumentReference> propertyRefs = leads.map((e) => e.propertyRef).toSet();
+    properties = await Future.wait(propertyRefs.map((e) => e.get().then((value) => Property.fromSnapshot(value))).toList());
+    for (var element in properties) {
+      element.leads = leads.where((lead) => lead.propertyRef == element.reference).toList();
+    }
+    return properties;
+  }
+
+  // Future<List<Property>>
+
   int count = 0;
+
+  getColor(Lead lead) {
+    switch (lead.leadStatus) {
+      case LeadStatus.lead:
+        return Colors.transparent;
+      case LeadStatus.pendingApproval:
+        return Colors.yellow.shade100;
+      case LeadStatus.sold:
+        return Colors.lightGreen.shade100;
+      default:
+        return Colors.transparent;
+    }
+  }
+
+  Table getLeadTable(
+    List<Lead> leads,
+    BuildContext context,
+  ) {
+    return Table(
+      children: [
+        TableRow(
+          children: [
+            DataTable(
+              columns: const [
+                DataColumn(label: Text('Name')),
+                DataColumn(label: Text('Contact')),
+                DataColumn(label: Text('Agent')),
+                DataColumn(label: Text('Staff')),
+              ],
+              rows: leads
+                  .map((e) => DataRow(color: MaterialStateProperty.all(getColor(e)), cells: [
+                        DataCell(Text(e.name)),
+                        DataCell(Text(e.phoneNumber ?? e.email ?? '')),
+                        DataCell(Text(widget.agent.firstName)),
+                        DataCell(
+                          DropdownButtonFormField<DocumentReference?>(
+                              value: e.staffRef,
+                              items: AppSession()
+                                  .staffs
+                                  .map((staff) => DropdownMenuItem<DocumentReference?>(
+                                        value: staff.reference,
+                                        child: Text(staff.firstName),
+                                      ))
+                                  .toList(),
+                              isExpanded: true,
+                              decoration: const InputDecoration(border: OutlineInputBorder()),
+                              onChanged: e.leadStatus == LeadStatus.sold
+                                  ? null
+                                  : (val) {
+                                      if (val != null) {
+                                        e.assignStaff(val);
+                                      }
+                                    }),
+                        ),
+                      ]))
+                  .toList(),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: FutureBuilder<List<Lead>>(
-          future: getLeads(),
-          builder: (BuildContext context, AsyncSnapshot<List<Lead>> snapshot) {
+        body: FutureBuilder<List<Property>>(
+          future: getProperties(),
+          builder: (BuildContext context, AsyncSnapshot<List<Property>> snapshot) {
             if ((snapshot.connectionState == ConnectionState.active || snapshot.connectionState == ConnectionState.done) && snapshot.hasData) {
               var list = snapshot.data!;
-              var successlist = list.where((element) => element.leadStatus == LeadStatus.sold);
-              count = successlist.length;
-              return Column(
-                children: [
-                  SizedBox(
-                    width: double.maxFinite,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 4,
-                          child: AspectRatio(
-                            aspectRatio: 1,
-                            child: Padding(
-                              padding: const EdgeInsets.all(32.0),
-                              child: Stack(
-                                children: [
-                                  Positioned.fill(
-                                    child: CircularProgressIndicator(
-                                      value: count / list.length,
-                                      backgroundColor: Colors.grey,
-                                      strokeWidth: 16,
+              var alllist = list.map((e) => e.leads).reduce((value, element) => value.followedBy(element).toList());
+              var successlist = alllist.where((element) => element.leadStatus == LeadStatus.sold);
+              var count = successlist.length;
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: double.maxFinite,
+                      child: Row(
+                        children: <Widget>[
+                          Expanded(
+                            flex: 4,
+                            child: AspectRatio(
+                              aspectRatio: 1,
+                              child: Padding(
+                                padding: const EdgeInsets.all(32.0),
+                                child: Stack(
+                                  children: [
+                                    Positioned.fill(
+                                      child: CircularProgressIndicator(
+                                        value: count / list.length,
+                                        backgroundColor: Colors.grey,
+                                        strokeWidth: 16,
+                                      ),
                                     ),
+                                    Positioned.fill(
+                                        child: Center(
+                                            child: Text(
+                                      "$count/${snapshot.data!.fold<int>(0, (previousValue, element) => (previousValue + element.leads.length))}\n LEADS",
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(fontSize: 18),
+                                    )))
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 5,
+                            child: AspectRatio(
+                              aspectRatio: 1,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 4,
+                                        child: ListTile(
+                                          title: const Text("LEADS"),
+                                          subtitle: Text(snapshot.data!.length.toString()),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 6,
+                                        child: ListTile(
+                                          title: const Text("CONVERTED"),
+                                          subtitle: Text(count.toString()),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  Positioned.fill(
-                                      child: Center(
-                                          child: Text(
-                                    "$count/${snapshot.data!.length}\n LEADS",
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(fontSize: 18),
-                                  )))
+                                  ListTile(
+                                    title: const Text("COMISSION EARNED"),
+                                    subtitle: Text(successlist
+                                        .fold<double>(0, (double previousValue, element) => previousValue + element.agentComissionAmount)
+                                        .toString()),
+                                  ),
                                 ],
                               ),
                             ),
                           ),
-                        ),
-                        Expanded(
-                          flex: 5,
-                          child: AspectRatio(
-                            aspectRatio: 1,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      flex: 4,
-                                      child: ListTile(
-                                        title: const Text("LEADS"),
-                                        subtitle: Text(snapshot.data!.length.toString()),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 6,
-                                      child: ListTile(
-                                        title: const Text("CONVERTED"),
-                                        subtitle: Text(count.toString()),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                ListTile(
-                                  title: const Text("COMISSION EARNED"),
-                                  subtitle: Text(successlist
-                                      .fold<double>(0, (double previousValue, element) => previousValue + element.agentComissionAmount)
-                                      .toString()),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) {
-                          var lead = snapshot.data![index];
-                          return Card(
-                            child: ExpansionTile(
-                              trailing: lead.leadStatus != LeadStatus.lead
-                                  ? null
-                                  : IconButton(onPressed: lead.reference.delete, icon: const Icon(Icons.delete)),
-                              title: Text(lead.name),
-                              subtitle: Text(lead.phoneNumber ?? lead.email ?? ''),
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: ListTile(
-                                        title: const Text("Staff"),
-                                        subtitle: Text(lead.staff?.firstName ?? "Staff Record Not found"),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: ListTile(
-                                        title: const Text("Staff Contact"),
-                                        subtitle: Text(lead.staff?.phoneNumber ?? "Staff Record Not found"),
-                                      ),
-                                    ),
-                                  ],
+                    Container(),
+                  ]
+                      .followedBy(snapshot.data!
+                          .map((property) => Card(
+                                child: ExpansionTile(
+                                  trailing: Text(property.leadCount.toString()),
+                                  title: Text(property.title),
+                                  subtitle: Text(property.district ?? ''),
+                                  children: [getLeadTable(property.leads, context)],
                                 ),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: ListTile(
-                                        title: const Text("Government ID"),
-                                        subtitle: Text(lead.governmentId ?? ''),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: lead.leadStatus == LeadStatus.sold
-                                          ? ListTile(
-                                              title: const Text("COMISSION EANRED"),
-                                              subtitle: Text(lead.agentComissionAmount.toString()),
-                                            )
-                                          : Container(),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                  ),
-                ],
+                              ))
+                          .toList())
+                      .toList(),
+                ),
               );
             }
             if (snapshot.hasError) {

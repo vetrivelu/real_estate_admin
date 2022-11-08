@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:real_estate_admin/Model/Agent.dart';
 import 'package:real_estate_admin/Model/Project.dart';
 import 'package:real_estate_admin/Model/Property.dart';
@@ -189,14 +190,22 @@ class _SaleListState extends State<SaleList> {
                           _scrollController.jumpTo(_scrollController.offset + offset);
                         }
                       },
-                      child: PaginatedDataTable(
-                        controller: _scrollController,
-                        rowsPerPage: (Get.height ~/ kMinInteractiveDimension) - 7,
-                        columns: SaleListSourse.getColumns(),
-                        source: SaleListSourse(
-                          snapshot.data!,
-                          context: context,
-                        ),
+                      child: Table(
+                        children: [
+                          TableRow(
+                            children: [
+                              PaginatedDataTable(
+                                controller: _scrollController,
+                                rowsPerPage: (Get.height ~/ kMinInteractiveDimension) - 7,
+                                columns: SaleListSourse.getColumns(),
+                                source: SaleListSourse(
+                                  snapshot.data!,
+                                  context: context,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     );
                   }
@@ -222,6 +231,8 @@ class SaleListSourse extends DataTableSource {
   final BuildContext context;
   SaleListSourse(this.leads, {required this.context});
 
+  final _format = NumberFormat.currency(locale: 'en-IN');
+
   @override
   DataRow? getRow(int index) {
     // TODO: implement getRow
@@ -235,14 +246,14 @@ class SaleListSourse extends DataTableSource {
         DataCell(Text(_lead.name)),
         DataCell(Text(_lead.phoneNumber ?? '')),
         // const DataCell(Text('42,50,500')),
-        DataCell(Text(_lead.sellingAmount.toString())),
+        DataCell(Text(_format.format(_lead.sellingAmount))),
 
         DataCell(Text(_lead.staff?.firstName ?? '')),
-        DataCell(Text(_lead.staffComissionAmount.toString())),
+        DataCell(Text(_format.format(_lead.staffComissionAmount))),
         DataCell(Text(_lead.agent?.firstName ?? '')),
-        DataCell(Text(_lead.agentComissionAmount.toString())),
+        DataCell(Text(_format.format(_lead.agentComissionAmount))),
         DataCell(Text(_lead.agent?.superAgent?.firstName ?? '')),
-        DataCell(Text(_lead.superAgentComissionAmount.toString())),
+        DataCell(Text(_format.format(_lead.superAgentComissionAmount))),
 
         DataCell(Text(DateTime.now().add(Duration(days: index)).toString().substring(0, 10))),
 
@@ -266,10 +277,10 @@ class SaleListSourse extends DataTableSource {
                   });
             });
           },
-          child: const Text("Property"),
+          child: Text('P${_lead.propertyID.toString().padLeft(6, '0')}'),
         )),
         DataCell(IconButton(
-          icon: const Icon(Icons.edit),
+          icon: (_lead.leadStatus != LeadStatus.sold && AppSession().isAdmin) ? const Icon(Icons.edit) : const Icon(Icons.visibility),
           onPressed: () {
             showDialog(
                 context: context,

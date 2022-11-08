@@ -20,11 +20,14 @@ class LeadFormController {
   Staff? staff;
   DocumentReference? _reference;
   LeadStatus leadStatus = LeadStatus.lead;
+  int? propertyID;
 
   ComissionController staffComission = ComissionController();
   ComissionController agentComission = ComissionController();
   ComissionController superAgentComission = ComissionController();
   final TextEditingController sellingAmount = TextEditingController(text: '0.00');
+
+  DateTime? soldOn;
 
   DocumentReference get reference => _reference ?? propertyRef.collection('leads').doc();
 
@@ -50,11 +53,15 @@ class LeadFormController {
     controller.superAgentComission = ComissionController.fromComission(lead.superAgentComission);
     controller.sellingAmount.text = lead.sellingAmount.toString();
     controller.leadStatus = lead.leadStatus;
+    controller.propertyID = lead.propertyID;
+    controller.soldOn = lead.soldOn;
     return controller;
   }
 
   Lead get lead {
     return Lead(
+      soldOn: soldOn,
+      propertyID: propertyID!,
       name: name.text,
       enquiryDate: enquiryDate,
       agentRef: agentRef,

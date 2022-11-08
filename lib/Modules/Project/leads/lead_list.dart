@@ -43,26 +43,6 @@ class _LeadListState extends State<LeadList> {
                   defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                   children: [
                     TableRow(children: [
-                      // TileFormField(
-                      //   controller: from,
-                      //   title: 'FROM DATE',
-                      //   suffix: IconButton(
-                      //     onPressed: () {
-                      //       assignDate(from);
-                      //     },
-                      //     icon: Icon(Icons.calendar_month),
-                      //   ),
-                      // ),
-                      // TileFormField(
-                      //   controller: to,
-                      //   title: 'TO DATE',
-                      //   suffix: GestureDetector(
-                      //     onTap: () {
-                      //       assignDate(to);
-                      //     },
-                      //     child: Icon(Icons.calendar_month),
-                      //   ),
-                      // ),
                       ListTile(
                         title: const Text("STAFF"),
                         subtitle: Padding(
@@ -153,7 +133,7 @@ class _LeadListState extends State<LeadList> {
                   if (snapshot.hasError) {
                     printError(info: snapshot.error.toString());
                     return Center(
-                      child: Text(snapshot.error.toString()),
+                      child: SelectableText(snapshot.error.toString()),
                     );
                   }
                   return const Center(
@@ -189,7 +169,7 @@ class LeadListSourse extends DataTableSource {
   DataRow? getRow(int index) {
     final _lead = leads[index];
 
-    return DataRow.byIndex(
+    var dataRow = DataRow.byIndex(
       color: MaterialStateProperty.all(getColor(_lead)),
       index: index,
       cells: [
@@ -209,13 +189,13 @@ class LeadListSourse extends DataTableSource {
                   .toList(),
               isExpanded: true,
               decoration: const InputDecoration(border: OutlineInputBorder()),
-              onChanged: _lead.leadStatus != LeadStatus.lead
-                  ? null
-                  : (val) {
+              onChanged: _lead.leadStatus == LeadStatus.lead && AppSession().isAdmin
+                  ? (val) {
                       if (val != null) {
                         _lead.assignStaff(val);
                       }
-                    }),
+                    }
+                  : null),
         ),
         DataCell(Text(AppSession().agents.where((element) => element.reference == _lead.agentRef).first.firstName)),
         DataCell(Text(_lead.enquiryDate.toString().substring(0, 10))),
@@ -239,7 +219,7 @@ class LeadListSourse extends DataTableSource {
                   });
             });
           },
-          child: const Text("Property"),
+          child: Text('P${_lead.propertyID.toString().padLeft(6, '0')}'),
         )),
         DataCell(_lead.leadStatus != LeadStatus.lead
             ? Container()
@@ -304,6 +284,10 @@ class LeadListSourse extends DataTableSource {
                 icon: const Icon(Icons.delete)))
       ],
     );
+    if (!AppSession().isAdmin) {
+      dataRow.cells.removeLast();
+    }
+    return dataRow;
   }
 
   @override
@@ -330,6 +314,9 @@ class LeadListSourse extends DataTableSource {
       const DataColumn(label: Text("Edit")),
       const DataColumn(label: Text("Delete")),
     ]);
+    if (!AppSession().isAdmin) {
+      list.removeLast();
+    }
     return list;
   }
 }

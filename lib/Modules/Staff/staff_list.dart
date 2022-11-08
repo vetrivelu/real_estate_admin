@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:real_estate_admin/Model/Staff.dart';
 import 'package:real_estate_admin/Modules/Staff/staff_form.dart';
 
@@ -90,7 +91,7 @@ class _StaffListState extends State<StaffList> {
                                         DataCell(Text(e.phoneNumber)),
                                         DataCell(Text(e.panCardNumber ?? '')),
                                         DataCell(Text(e.email)),
-                                        DataCell(Text(e.commissionAmount.toString())),
+                                        DataCell(Text(NumberFormat.currency(locale: 'en-IN').format(e.commissionAmount))),
                                         DataCell(Text(e.leadCount.toString())),
                                         DataCell(Text(e.successfullLeadCount.toString())),
                                         DataCell(IconButton(

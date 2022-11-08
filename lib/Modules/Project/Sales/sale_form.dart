@@ -7,9 +7,12 @@ import 'package:real_estate_admin/Model/Property.dart';
 import 'package:real_estate_admin/Model/Result.dart';
 import 'package:real_estate_admin/Model/Staff.dart';
 import 'package:real_estate_admin/Model/Transaction.dart';
+import 'package:real_estate_admin/Modules/Dashboard/dashboardController.dart';
 import 'package:real_estate_admin/Providers/session.dart';
 import 'package:real_estate_admin/widgets/formfield.dart';
 import 'package:real_estate_admin/widgets/future_dialog.dart';
+
+import '../text_editing_controller.dart';
 
 class SaleForm extends StatefulWidget {
   const SaleForm({
@@ -27,9 +30,9 @@ class _SaleFormState extends State<SaleForm> {
   late ComissionController staffComission;
   late ComissionController agentComission;
   late ComissionController superAgentComission;
-  final TextEditingController sellingAmount = TextEditingController(text: '0.00');
+  final sellingAmount = CurrencyTextFieldController(rightSymbol: 'Rs. ', decimalSymbol: '.', thousandSymbol: ',');
 
-  double get sellingPrice => double.tryParse(sellingAmount.text) ?? 0;
+  double get sellingPrice => sellingAmount.doubleValue;
 
   Property? property;
   @override
@@ -152,8 +155,8 @@ class _SaleFormState extends State<SaleForm> {
                                     padding: const EdgeInsets.only(left: 8),
                                     child: Text(
                                       comission.comissionType == ComissionType.percent
-                                          ? (comission.comission.value * sellingPrice / 100).toStringAsFixed(2)
-                                          : comission.comission.value.toStringAsFixed(2),
+                                          ? NumberFormat.currency(locale: 'en-IN').format((comission.comission.value * sellingPrice / 100))
+                                          : NumberFormat.currency(locale: 'en-IN').format(comission.comission.value),
                                       style: Theme.of(context).textTheme.bodyText2,
                                     ),
                                   ),
@@ -264,33 +267,36 @@ class _SaleFormState extends State<SaleForm> {
               child: SizedBox(
                 height: 60,
                 width: double.maxFinite,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    var future;
-                    var lead = widget.lead;
-                    if ((AppSession().staff?.isAdmin) ?? false) {
-                      lead.leadStatus = LeadStatus.sold;
-                    } else if (widget.lead.leadStatus != LeadStatus.sold) {
-                      lead.leadStatus = LeadStatus.pendingApproval;
-                    }
-                    lead.staffComission = staffComission.comission;
-                    lead.agentComission = agentComission.comission;
-                    lead.superAgentComission = superAgentComission.comission;
-                    lead.sellingAmount = double.tryParse(sellingAmount.text) ?? 0;
-                    future = lead.reference
-                        .update(lead.toJson())
-                        .then((value) => Result(tilte: 'Success', message: "Record saved succesfully"))
-                        .onError((error, stackTrace) => Result(tilte: 'Failed', message: "Record is not updated \n ${error.toString()}"));
+                child: widget.lead.leadStatus == LeadStatus.sold
+                    ? Container()
+                    : ElevatedButton(
+                        onPressed: () async {
+                          var future;
+                          var lead = widget.lead;
+                          if ((AppSession().staff?.isAdmin) ?? false) {
+                            lead.leadStatus = LeadStatus.sold;
+                            lead.soldOn = DateTime.now().trimTime();
+                          } else if (widget.lead.leadStatus != LeadStatus.sold) {
+                            lead.leadStatus = LeadStatus.pendingApproval;
+                          }
+                          lead.staffComission = staffComission.comission;
+                          lead.agentComission = agentComission.comission;
+                          lead.superAgentComission = superAgentComission.comission;
+                          lead.sellingAmount = double.tryParse(sellingAmount.text) ?? 0;
+                          future = lead.reference
+                              .update(lead.toJson())
+                              .then((value) => Result(tilte: 'Success', message: "Record saved succesfully"))
+                              .onError((error, stackTrace) => Result(tilte: 'Failed', message: "Record is not updated \n ${error.toString()}"));
 
-                    showFutureDialog(
-                      context,
-                      future: future,
-                    );
-                  },
-                  child: Text(widget.lead.leadStatus == LeadStatus.lead
-                      ? "MARK PROPERTY AS SOLD"
-                      : (widget.lead.leadStatus == LeadStatus.pendingApproval ? (AppSession().isAdmin ? "SAVE AND APPROVE" : "SAVE") : "SAVE")),
-                ),
+                          showFutureDialog(
+                            context,
+                            future: future,
+                          );
+                        },
+                        child: Text(widget.lead.leadStatus == LeadStatus.lead
+                            ? "MARK PROPERTY AS SOLD"
+                            : (widget.lead.leadStatus == LeadStatus.pendingApproval ? (AppSession().isAdmin ? "SAVE AND APPROVE" : "SAVE") : "SAVE")),
+                      ),
               ),
             )
           ],

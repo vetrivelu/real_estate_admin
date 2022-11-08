@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:real_estate_admin/Model/Project.dart';
 import 'package:real_estate_admin/Model/Property.dart';
@@ -10,6 +11,8 @@ import 'package:real_estate_admin/Modules/Project/property_form.dart';
 import 'package:real_estate_admin/Modules/Project/property_view.dart';
 import 'package:real_estate_admin/widgets/formfield.dart';
 import 'package:real_estate_admin/widgets/future_dialog.dart';
+
+import '../../Providers/session.dart';
 
 class PropertyList extends StatefulWidget {
   const PropertyList({Key? key, required this.project}) : super(key: key);
@@ -99,25 +102,27 @@ class _PropertyListState extends State<PropertyList> {
                                   child: const Icon(Icons.search)),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 14.0, right: 16),
-                            child: SizedBox(
-                              height: 54,
-                              width: 60,
-                              child: ElevatedButton(
-                                  onPressed: () {
-                                    showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          return AlertDialog(
-                                            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                                            content: SizedBox(height: 800, width: 600, child: PropertyForm(project: widget.project)),
-                                          );
-                                        });
-                                  },
-                                  child: const Icon(Icons.add)),
-                            ),
-                          )
+                          (AppSession().staff?.isAdmin ?? false)
+                              ? Padding(
+                                  padding: const EdgeInsets.only(bottom: 14.0, right: 16),
+                                  child: SizedBox(
+                                    height: 54,
+                                    width: 60,
+                                    child: ElevatedButton(
+                                        onPressed: () {
+                                          showDialog(
+                                              context: context,
+                                              builder: (context) {
+                                                return AlertDialog(
+                                                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                                                  content: SizedBox(height: 800, width: 600, child: PropertyForm(project: widget.project)),
+                                                );
+                                              });
+                                        },
+                                        child: const Icon(Icons.add)),
+                                  ),
+                                )
+                              : Container(),
                         ],
                       ),
                       const Divider(),
@@ -134,7 +139,6 @@ class _PropertyListState extends State<PropertyList> {
                                   // selectedProperty = snapshot.data!.first;
                                   return StatefulBuilder(builder: (context, reload) {
                                     return GridView.count(
-                                      childAspectRatio: 2.5 / 3,
                                       crossAxisCount: 3,
                                       padding: const EdgeInsets.all(8),
                                       children: snapshot.data!
@@ -214,12 +218,20 @@ class PropertyTile extends StatelessWidget {
                 children: [
                   AspectRatio(
                     aspectRatio: 16 / 9,
-                    child: Image.network(
-                      property.coverPhoto ?? 'https://picsum.photos/id/1/200/300',
-                      fit: BoxFit.cover,
-                    ),
+                    child: property.coverPhoto == null
+                        ? Image.asset('assets/logo.png')
+                        : Image.network(
+                            property.coverPhoto!,
+                            fit: BoxFit.cover,
+                          ),
                   ),
-                  Positioned.fill(child: property.isSold ? Image.asset('assets/sold.png') : Container()),
+                  Positioned.fill(
+                      child: property.isSold
+                          ? Opacity(
+                              opacity: 0.3,
+                              child: Image.asset('assets/sold.png'),
+                            )
+                          : Container()),
                 ],
               ),
               const Divider(),
@@ -229,49 +241,53 @@ class PropertyTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 selected: selected,
-                isThreeLine: true,
                 subtitle: Text(
-                  property.description ?? '',
+                  NumberFormat.currency(locale: 'en-IN').format(property.propertyAmount),
                   overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
+                trailing: Column(
                   children: [
-                    TextButton(
-                        onPressed: () {
-                          var future =
-                              property.reference.delete().then((value) => Result.completed("Property Deleted Successfully")).onError((error, stcak) {
-                            if (error is FirebaseException) {
-                              return Result(tilte: error.code, message: error.message ?? '');
-                            } else {
-                              return Result(tilte: 'Failed', message: error.toString());
-                            }
-                          });
-                          showFutureDialog(context, future: future);
-                        },
-                        child: const Text("DELETE")),
-                    TextButton(
-                        onPressed: () {
-                          showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                                  content: SizedBox(
-                                      height: 800,
-                                      width: 600,
-                                      child: PropertyForm(
-                                        property: property,
-                                        project: projectController.projectFormData.object,
-                                      )),
-                                );
-                              });
-                        },
-                        child: const Text("EDIT")),
+                    Text(
+                      "Leads\n${property.leadCount}",
+                      textAlign: TextAlign.center,
+                    ),
                   ],
                 ),
+              ),
+              ButtonBar(
+                children: [
+                  TextButton(
+                      onPressed: () {
+                        var future =
+                            property.reference.delete().then((value) => Result.completed("Property Deleted Successfully")).onError((error, stcak) {
+                          if (error is FirebaseException) {
+                            return Result(tilte: error.code, message: error.message ?? '');
+                          } else {
+                            return Result(tilte: 'Failed', message: error.toString());
+                          }
+                        });
+                        showFutureDialog(context, future: future);
+                      },
+                      child: const Text("DELETE")),
+                  TextButton(
+                      onPressed: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                                content: SizedBox(
+                                    height: 800,
+                                    width: 600,
+                                    child: PropertyForm(
+                                      property: property,
+                                      project: projectController.projectFormData.object,
+                                    )),
+                              );
+                            });
+                      },
+                      child: const Text("EDIT")),
+                ],
               )
             ],
           ),

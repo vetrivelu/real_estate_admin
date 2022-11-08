@@ -31,7 +31,16 @@ class _HomeState extends State<Home> {
             width: Get.width * 0.125,
             child: Column(
               children: [
-                const AspectRatio(aspectRatio: 1),
+                AspectRatio(
+                  aspectRatio: 1,
+                  child: Center(
+                    child: Image.asset('assets/logo.png'),
+                  ),
+                ),
+                AspectRatio(
+                  aspectRatio: 2,
+                  child: Container(),
+                ),
                 ListTile(
                   selected: selectedTile == 0,
                   title: const Text("Dashboard"),
@@ -43,7 +52,7 @@ class _HomeState extends State<Home> {
                     setState(() {
                       selectedTile = 0;
                     });
-                    Get.offAll(() => Container());
+                    Get.offAll(() => const Dashboard());
                   },
                 ),
                 ListTile(

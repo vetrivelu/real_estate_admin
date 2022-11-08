@@ -119,23 +119,24 @@ class _LeadFormState extends State<LeadForm> {
                     subtitle: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: DropdownButtonFormField<DocumentReference?>(
-                          value: controller.staffRef,
-                          items: AppSession()
-                              .staffs
-                              .map((staff) => DropdownMenuItem<DocumentReference?>(
-                                    value: staff.reference,
-                                    child: Text(staff.firstName),
-                                  ))
-                              .toList(),
-                          isExpanded: true,
-                          decoration: const InputDecoration(border: OutlineInputBorder()),
-                          onChanged: controller.leadStatus != LeadStatus.lead
-                              ? null
-                              : (val) {
-                                  if (val != null) {
-                                    controller.staffRef = val;
-                                  }
-                                }),
+                        value: controller.staffRef,
+                        items: AppSession()
+                            .staffs
+                            .map((staff) => DropdownMenuItem<DocumentReference?>(
+                                  value: staff.reference,
+                                  child: Text(staff.firstName),
+                                ))
+                            .toList(),
+                        isExpanded: true,
+                        decoration: const InputDecoration(border: OutlineInputBorder()),
+                        onChanged: controller.leadStatus == LeadStatus.lead && AppSession().isAdmin
+                            ? (val) {
+                                if (val != null) {
+                                  controller.staffRef = val;
+                                }
+                              }
+                            : null,
+                      ),
                     ),
                   ),
                 ),
@@ -145,28 +146,29 @@ class _LeadFormState extends State<LeadForm> {
                     subtitle: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: DropdownButtonFormField<DocumentReference?>(
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Please select an agent';
-                            }
-                          },
-                          value: controller.agentRef,
-                          items: AppSession()
-                              .agents
-                              .map((agent) => DropdownMenuItem<DocumentReference?>(
-                                    value: agent.reference,
-                                    child: Text(agent.firstName),
-                                  ))
-                              .toList(),
-                          isExpanded: true,
-                          decoration: const InputDecoration(border: OutlineInputBorder()),
-                          onChanged: controller.leadStatus != LeadStatus.lead
-                              ? null
-                              : (val) {
-                                  if (val != null) {
-                                    controller.agentRef = val;
-                                  }
-                                }),
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Please select an agent';
+                          }
+                        },
+                        value: controller.agentRef,
+                        items: AppSession()
+                            .agents
+                            .map((agent) => DropdownMenuItem<DocumentReference?>(
+                                  value: agent.reference,
+                                  child: Text(agent.firstName),
+                                ))
+                            .toList(),
+                        isExpanded: true,
+                        decoration: const InputDecoration(border: OutlineInputBorder()),
+                        onChanged: controller.leadStatus == LeadStatus.lead && AppSession().isAdmin
+                            ? (val) {
+                                if (val != null) {
+                                  controller.agentRef = val;
+                                }
+                              }
+                            : null,
+                      ),
                     ),
                   ),
                 ),
@@ -195,6 +197,7 @@ class _LeadFormState extends State<LeadForm> {
                         }
                       });
                       if (_formKey.currentState!.validate()) {
+                        controller.propertyID = widget.property.propertyID;
                         var future = widget.lead == null
                             ? widget.property.addLead(controller.lead)
                             : widget.lead!.reference

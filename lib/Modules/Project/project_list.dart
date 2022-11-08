@@ -125,7 +125,7 @@ class _ProjectListState extends State<ProjectList> {
                   if ((snapshot.connectionState == ConnectionState.active || snapshot.connectionState == ConnectionState.done) && snapshot.hasData) {
                     List<Project> projectslist = snapshot.data!.docs.map((e) => Project.fromSnapshot(e)).toList();
                     return GridView.count(
-                      crossAxisCount: 4,
+                      crossAxisCount: 5,
                       children: projectslist.map((e) => ProjectTile(project: e)).toList(),
                     );
                   }

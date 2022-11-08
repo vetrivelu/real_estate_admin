@@ -22,6 +22,7 @@ class PropertyViewModel extends ChangeNotifier {
   var agentComission = Commission();
   var superAgentComission = Commission();
   var staffComission = Commission();
+  int? propertyID;
 
   ComissionType comissionType = ComissionType.amount;
   DocumentReference? _reference;
@@ -75,6 +76,7 @@ class PropertyViewModel extends ChangeNotifier {
   }
 
   Property get property => Property(
+        propertyID: propertyID!,
         title: title.text,
         plotNumber: plotNumber.text,
         surveyNumber: surveyNumber.text,
@@ -115,6 +117,7 @@ class PropertyViewModel extends ChangeNotifier {
     propertyViewModel.isSold = property.isSold;
     propertyViewModel.leads = property.leads;
     propertyViewModel._reference = property.reference;
+    propertyViewModel.propertyID = property.propertyID;
     return propertyViewModel;
   }
 }

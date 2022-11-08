@@ -209,7 +209,7 @@ class _PropertyFormState extends State<PropertyForm> {
                       if (required != null) {
                         return required;
                       } else {
-                        var plainText = p0?.replaceAll(",", "");
+                        var plainText = p0!.split('Rs. ').last.replaceAll(",", "");
                         if (plainText != null) {
                           var num = double.tryParse(plainText);
                           if (num == null) {

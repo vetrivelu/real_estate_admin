@@ -1,8 +1,11 @@
 // ignore: file_names
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:real_estate_admin/Model/Result.dart';
 
+import '../Modules/Dashboard/dashboardController.dart';
 import 'Lead.dart';
 import 'Project.dart';
 
@@ -37,10 +40,26 @@ class Property {
   bool isSold;
   DocumentReference reference;
   int leadCount;
+  int propertyID;
 
   DocumentReference get projectRef => FirebaseFirestore.instance.doc(reference.path.split('/properties').first);
 
+  String get pid => 'P${propertyID.toString().padLeft(6, '0')}';
+
+  static Future<int> getNextPropertyId() {
+    return FirebaseFirestore.instance.runTransaction((transaction) async {
+      DocumentSnapshot<Map<String, dynamic>> snapshot = await transaction.get(counters);
+      int newProjectID = (snapshot.data()!['properties'] ?? 0) + 1;
+      transaction.update(counters, {'properties': newProjectID});
+      return newProjectID;
+    }).onError((error, stackTrace) {
+      print(error.toString());
+      return 0;
+    });
+  }
+
   Property({
+    required this.propertyID,
     required this.title,
     this.leadCount = 0,
     this.plotNumber,
@@ -85,6 +104,7 @@ class Property {
         "leads": leads.map((e) => e.toJson()).toList(),
         "isSold": isSold,
         "search": search,
+        'propertyID': propertyID,
       };
 
   Stream<List<Lead>> getLeads() {
@@ -133,7 +153,9 @@ class Property {
       leads = unparsedLeads.map((e) => Lead.fromJson(e, snapshot.reference)).toList();
     }
     return Property(
+      propertyID: json['propertyID'],
       reference: snapshot.reference,
+      leadCount: json['leadCount'],
       isSold: json["isSold"],
       title: json["title"],
       parentProject: json["parentProject"] != null ? Project.fromJson(json["parentProject"]) : null,

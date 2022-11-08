@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:real_estate_admin/Model/Agent.dart';
 import 'package:real_estate_admin/Modules/Agent/agent_form.dart';
 import 'package:real_estate_admin/Modules/Agent/agent_screen.dart';
+import 'package:real_estate_admin/Providers/session.dart';
 import 'package:real_estate_admin/widgets/formfield.dart';
 
 class AgentList extends StatefulWidget {
@@ -47,23 +48,25 @@ class _AgentListState extends State<AgentList> {
         ),
         centerTitle: true,
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.all(56.0),
-        child: FloatingActionButton(
-          onPressed: () {
-            // Get.to(() => const AgentForm());
-            showDialog(
-                context: context,
-                builder: (context) {
-                  return const AlertDialog(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                    content: SizedBox(height: 800, width: 600, child: AgentForm()),
-                  );
-                });
-          },
-          child: const Icon(Icons.add),
-        ),
-      ),
+      floatingActionButton: (AppSession().staff?.isAdmin ?? false)
+          ? Padding(
+              padding: const EdgeInsets.all(56.0),
+              child: FloatingActionButton(
+                onPressed: () {
+                  // Get.to(() => const AgentForm());
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return const AlertDialog(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                          content: SizedBox(height: 800, width: 600, child: AgentForm()),
+                        );
+                      });
+                },
+                child: const Icon(Icons.add),
+              ),
+            )
+          : null,
       body: Column(
         children: [
           Align(
