@@ -257,7 +257,6 @@ class _PropertyFormState extends State<PropertyForm> {
                           }
                           showFutureDialog(context, future: future, onSucess: (val) {
                             Navigator.of(context).pop();
-                            Navigator.of(context).pop();
                           });
                         }
                       },

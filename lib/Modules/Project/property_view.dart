@@ -68,30 +68,51 @@ class _PropertyViewState extends State<PropertyView> {
                 ),
               ],
             ),
-            SizedBox(
-              width: Get.width,
-              height: Get.height * 0.15,
-              child: ListView.builder(
-                padding: const EdgeInsets.all(8.0),
-                scrollDirection: Axis.horizontal,
-                itemCount: widget.property.photos.length,
-                itemBuilder: (BuildContext context, int index) {
-                  var img = widget.property.photos[index];
-                  return Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(12, 12, 12, 12),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.network(
-                        img,
-                        width: 100,
-                        height: 100,
-                        fit: BoxFit.cover,
-                      ),
+            widget.property.photos.isEmpty
+                ? Container()
+                : SizedBox(
+                    width: Get.width,
+                    height: Get.height * 0.15,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(8.0),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: widget.property.photos.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        var img = widget.property.photos[index];
+                        return Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(12, 12, 12, 12),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: GestureDetector(
+                              onTap: () {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                                        content: SizedBox(
+                                          height: 800,
+                                          width: 600,
+                                          child: Image.network(
+                                            img,
+                                            fit: BoxFit.contain,
+                                          ),
+                                        ),
+                                      );
+                                    });
+                              },
+                              child: Image.network(
+                                img,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
-            ),
+                  ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Card(

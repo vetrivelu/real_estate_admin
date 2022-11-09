@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:real_estate_admin/Model/Lead.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 
 class LeadChart extends StatelessWidget {
-  const LeadChart({super.key, required this.dateWiseLeads});
+  const LeadChart({super.key, required this.dateWiseLeads, required this.title, required this.color});
 
   final Map<DateTime, List<Lead>> dateWiseLeads;
+  final String title;
+  final Color color;
 
   List<ChartXY> getData() {
     Set<ChartXY> list = {};
@@ -29,6 +30,7 @@ class LeadChart extends StatelessWidget {
         id: 'PER DAY LEAD',
         domainFn: ((datum, index) => datum.date),
         measureFn: (datum, index) => datum.count,
+        colorFn: (datum, index) => charts.ColorUtil.fromDartColor(color),
         data: getData(),
       ),
     ];
@@ -36,14 +38,30 @@ class LeadChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-        aspectRatio: 2,
-        child: charts.TimeSeriesChart(
-          getSeries(),
-          defaultRenderer: charts.BarRendererConfig<DateTime>(),
-          defaultInteractions: false,
-          behaviors: [charts.SelectNearest(), charts.DomainHighlighter()],
-        ));
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+        elevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24.0),
+        ),
+        child: AspectRatio(
+            aspectRatio: 2,
+            child: Column(
+              children: [
+                Text(title),
+                Expanded(
+                  child: charts.TimeSeriesChart(
+                    getSeries(),
+                    defaultRenderer: charts.BarRendererConfig<DateTime>(),
+                    defaultInteractions: false,
+                    behaviors: [charts.SelectNearest(), charts.DomainHighlighter()],
+                  ),
+                ),
+              ],
+            )),
+      ),
+    );
   }
 }
 

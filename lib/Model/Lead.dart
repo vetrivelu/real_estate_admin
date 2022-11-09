@@ -95,7 +95,7 @@ class Lead {
       };
   factory Lead.fromJson(json, DocumentReference reference) {
     return Lead(
-      soldOn: json["soldOn"],
+      soldOn: json["soldOn"]?.toDate(),
       propertyID: json['propertyID'],
       parentProperty: json['parentProperty'],
       name: json["name"],
@@ -119,7 +119,7 @@ class Lead {
   factory Lead.fromSnapshot(DocumentSnapshot<Map<String, dynamic>> snapshot) {
     Map<String, dynamic> json = snapshot.data()!;
     return Lead(
-      soldOn: json["soldOn"],
+      soldOn: json["soldOn"]?.toDate(),
       propertyID: json['propertyID'],
       parentProperty: json['parentProperty'],
       name: json["name"],

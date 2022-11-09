@@ -207,7 +207,6 @@ class _LeadFormState extends State<LeadForm> {
                         // ignore: use_build_context_synchronously
                         showFutureDialog(context, future: future, onSucess: (val) {
                           Navigator.of(context).pop();
-                          Navigator.of(context).pop();
                         });
                       }
                     },

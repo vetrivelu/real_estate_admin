@@ -1,13 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:real_estate_admin/Model/Lead.dart';
 import 'package:real_estate_admin/Model/Property.dart';
 import 'package:real_estate_admin/Model/Result.dart';
 import 'package:real_estate_admin/Model/Staff.dart';
-import 'package:real_estate_admin/Model/Transaction.dart';
-import 'package:real_estate_admin/Modules/Dashboard/dashboardController.dart';
+import 'package:real_estate_admin/Modules/Dashboard/bar_chart.dart';
 import 'package:real_estate_admin/Providers/session.dart';
 import 'package:real_estate_admin/widgets/formfield.dart';
 import 'package:real_estate_admin/widgets/future_dialog.dart';

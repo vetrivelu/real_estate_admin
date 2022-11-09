@@ -34,12 +34,11 @@ class _HomeState extends State<Home> {
                 AspectRatio(
                   aspectRatio: 1,
                   child: Center(
-                    child: Image.asset('assets/logo.png'),
+                    child: Image.asset(
+                      'assets/logo.png',
+                      height: 150,
+                    ),
                   ),
-                ),
-                AspectRatio(
-                  aspectRatio: 2,
-                  child: Container(),
                 ),
                 ListTile(
                   selected: selectedTile == 0,

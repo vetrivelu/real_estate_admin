@@ -6,9 +6,6 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
-  // // await FirebaseAuth.instance.useAuthEmulator('192.168.211.107', 9099);
-  // await FirebaseStorage.instance.useStorageEmulator('localhost', 9199);
   runApp(const MyApp());
 }
 

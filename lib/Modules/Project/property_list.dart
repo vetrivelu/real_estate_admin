@@ -102,7 +102,7 @@ class _PropertyListState extends State<PropertyList> {
                                   child: const Icon(Icons.search)),
                             ),
                           ),
-                          (AppSession().staff?.isAdmin ?? false)
+                          (AppSession().isAdmin)
                               ? Padding(
                                   padding: const EdgeInsets.only(bottom: 14.0, right: 16),
                                   child: SizedBox(
@@ -228,7 +228,7 @@ class PropertyTile extends StatelessWidget {
                   Positioned.fill(
                       child: property.isSold
                           ? Opacity(
-                              opacity: 0.3,
+                              opacity: 0.5,
                               child: Image.asset('assets/sold.png'),
                             )
                           : Container()),

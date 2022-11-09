@@ -22,11 +22,11 @@ class AppSession extends ChangeNotifier {
   AppSession._internal() {
     firbaseAuth.authStateChanges().listen((event) async {
       if (event != null) {
-        staffs = await Staff.getStaffs();
-
-        FirebaseFirestore.instance.collection('agents').get().then((value) => value.docs.map((e) => Agent.fromSnapshot(e)).toList()).then((value) {
-          agents = value;
-          print(agents.length);
+        FirebaseFirestore.instance.collection('staffs').snapshots().listen((value) {
+          staffs = value.docs.map((e) => Staff.fromSnapshot(e)).toList();
+        });
+        FirebaseFirestore.instance.collection('agents').snapshots().listen((value) {
+          agents = value.docs.map((e) => Agent.fromSnapshot(e)).toList();
         });
         staff = staffs.firstWhereOrNull((element) => element.reference.id == event.uid);
       }
