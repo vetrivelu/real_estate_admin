@@ -28,10 +28,10 @@ class _LeadListState extends State<LeadList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("LEADS"),
-        centerTitle: true,
-      ),
+      // appBar: AppBar(
+      //   title: const Text("LEADS"),
+      //   centerTitle: true,
+      // ),
       body: Column(
         children: [
           Padding(

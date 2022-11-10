@@ -9,6 +9,7 @@ import 'package:real_estate_admin/Modules/Staff/staff_form.dart';
 import 'package:real_estate_admin/Modules/Staff/staff_list.dart';
 import 'package:real_estate_admin/Providers/session.dart';
 import 'package:real_estate_admin/auth_gate.dart';
+import 'package:real_estate_admin/get_constants.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key, required this.child}) : super(key: key);
@@ -26,123 +27,134 @@ class _HomeState extends State<Home> {
     var session = AppSession();
     return Row(
       children: [
-        Card(
-          child: Drawer(
-            width: Get.width * 0.125,
-            child: Column(
-              children: [
-                AspectRatio(
-                  aspectRatio: 1,
-                  child: Center(
-                    child: Image.asset(
-                      'assets/logo.png',
-                      height: 150,
-                    ),
-                  ),
-                ),
-                ListTile(
-                  selected: selectedTile == 0,
-                  title: const Text("Dashboard"),
-                  selectedColor: Colors.blue,
-                  trailing: const Icon(Icons.dashboard),
-                  onTap: () {
-                    // session.pageController.jumpToPage(0);
-
-                    setState(() {
-                      selectedTile = 0;
-                    });
-                    Get.offAll(() => const Dashboard());
-                  },
-                ),
-                ListTile(
-                  selected: selectedTile == 1,
-                  title: const Text("Projects"),
-                  trailing: const Icon(Icons.tab),
-                  onTap: () {
-                    // session.pageController.jumpToPage(1);
-                    setState(() {
-                      selectedTile = 1;
-                    });
-                    Get.offAll(() => const ProjectList());
-                  },
-                ),
-                ListTile(
-                  selected: selectedTile == 2,
-                  title: const Text("Agents"),
-                  trailing: const Icon(Icons.people),
-                  onTap: () {
-                    // session.pageController.jumpToPage(2);
-                    setState(() {
-                      selectedTile = 2;
-                    });
-                    Get.offAll(() => const AgentList());
-                  },
-                ),
-                AppSession().isAdmin
-                    ? ListTile(
-                        selected: selectedTile == 3,
-                        title: const Text("Staffs"),
-                        trailing: const Icon(Icons.people_sharp),
-                        onTap: () {
-                          // session.pageController.jumpToPage(2);
-                          setState(() {
-                            selectedTile = 3;
-                          });
-                          Get.offAll(() => const StaffList());
-                        },
-                      )
-                    : Container(),
-                ListTile(
-                  selected: selectedTile == 4,
-                  title: const Text("Leads"),
-                  trailing: const Icon(Icons.people_sharp),
-                  onTap: () {
-                    // session.pageController.jumpToPage(2);
-                    setState(() {
-                      selectedTile = 4;
-                    });
-                    Get.offAll(() => const LeadList());
-                  },
-                ),
-                ListTile(
-                  selected: selectedTile == 5,
-                  title: const Text("Sales"),
-                  trailing: const Icon(Icons.people_sharp),
-                  onTap: () {
-                    // session.pageController.jumpToPage(2);
-                    setState(() {
-                      selectedTile = 5;
-                    });
-                    Get.offAll(() => const SaleList());
-                  },
-                ),
-                ListTile(
-                  title: const Text("My Profile"),
-                  trailing: const Icon(Icons.person),
-                  onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                            content: SizedBox(height: 800, width: 600, child: StaffForm(staff: AppSession().staff)),
-                          );
-                        });
-                  },
-                ),
-                ListTile(
-                  title: const Text("Logout"),
-                  trailing: const Icon(Icons.logout),
-                  onTap: () {
-                    session.firbaseAuth.signOut();
-                  },
-                ),
-              ],
-            ),
+        isDesktop(context) ? getDrawer(context, session) : Container(),
+        Expanded(
+            child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.white,
           ),
-        ),
-        Expanded(child: widget.child),
+          drawer: isDesktop(context) ? null : getDrawer(context, session),
+          body: widget.child,
+        )),
       ],
+    );
+  }
+
+  Card getDrawer(BuildContext context, AppSession session) {
+    return Card(
+      child: Drawer(
+        width: Get.width * 0.150,
+        child: Column(
+          children: [
+            AspectRatio(
+              aspectRatio: 1,
+              child: Center(
+                child: Image.asset(
+                  'assets/logo.png',
+                  height: 150,
+                ),
+              ),
+            ),
+            ListTile(
+              selected: selectedTile == 0,
+              title: const Text("Dashboard"),
+              selectedColor: Colors.blue,
+              trailing: const Icon(Icons.dashboard),
+              onTap: () {
+                // session.pageController.jumpToPage(0);
+
+                setState(() {
+                  selectedTile = 0;
+                });
+                Get.offAll(() => const Dashboard());
+              },
+            ),
+            ListTile(
+              selected: selectedTile == 1,
+              title: const Text("Projects"),
+              trailing: const Icon(Icons.tab),
+              onTap: () {
+                // session.pageController.jumpToPage(1);
+                setState(() {
+                  selectedTile = 1;
+                });
+                Get.offAll(() => const ProjectList());
+              },
+            ),
+            ListTile(
+              selected: selectedTile == 2,
+              title: const Text("Agents"),
+              trailing: const Icon(Icons.people),
+              onTap: () {
+                // session.pageController.jumpToPage(2);
+                setState(() {
+                  selectedTile = 2;
+                });
+                Get.offAll(() => const AgentList());
+              },
+            ),
+            AppSession().isAdmin
+                ? ListTile(
+                    selected: selectedTile == 3,
+                    title: const Text("Staffs"),
+                    trailing: const Icon(Icons.people_sharp),
+                    onTap: () {
+                      // session.pageController.jumpToPage(2);
+                      setState(() {
+                        selectedTile = 3;
+                      });
+                      Get.offAll(() => const StaffList());
+                    },
+                  )
+                : Container(),
+            ListTile(
+              selected: selectedTile == 4,
+              title: const Text("Leads"),
+              trailing: const Icon(Icons.people_sharp),
+              onTap: () {
+                // session.pageController.jumpToPage(2);
+                setState(() {
+                  selectedTile = 4;
+                });
+                Get.offAll(() => const LeadList());
+              },
+            ),
+            ListTile(
+              selected: selectedTile == 5,
+              title: const Text("Sales"),
+              trailing: const Icon(Icons.people_sharp),
+              onTap: () {
+                // session.pageController.jumpToPage(2);
+                setState(() {
+                  selectedTile = 5;
+                });
+                Get.offAll(() => const SaleList());
+              },
+            ),
+            ListTile(
+              title: const Text("My Profile"),
+              trailing: const Icon(Icons.person),
+              onTap: () {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                        content: SizedBox(height: 800, width: 600, child: StaffForm(staff: AppSession().staff)),
+                      );
+                    });
+              },
+            ),
+            ListTile(
+              title: const Text("Logout"),
+              trailing: const Icon(Icons.logout),
+              onTap: () {
+                session.firbaseAuth.signOut();
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

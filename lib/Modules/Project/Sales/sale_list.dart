@@ -60,10 +60,10 @@ class _SaleListState extends State<SaleList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("SALES REPORT"),
-        centerTitle: true,
-      ),
+      // appBar: AppBar(
+      //   title: const Text("SALES REPORT"),
+      //   centerTitle: true,
+      // ),
       body: Column(
         children: [
           Padding(

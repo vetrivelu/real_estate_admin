@@ -36,9 +36,9 @@ class _PropertyListState extends State<PropertyList> {
     return ChangeNotifierProvider<ProjectController>(
       create: (context) => controller,
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.project.name),
-        ),
+        // appBar: AppBar(
+        //   title: Text(widget.project.name),
+        // ),
         body: Row(
           children: [
             Expanded(

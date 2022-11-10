@@ -30,7 +30,7 @@ class PropertyController {
   Future<Result> addProperty() async {
     propertyFormData.propertyID ??= await Property.getNextPropertyId();
     if (propertyFormData.coverPhototData != null) {
-      propertyFormData.coverPhoto = await uploadFile(propertyFormData.coverPhototData!, 'coverPhoto');
+      propertyFormData.coverPhoto = await uploadFile(propertyFormData.coverPhototData!, 'coverPhoto${propertyFormData.propertyID}');
     }
 
     if (propertyFormData.photosData.isNotEmpty) {
@@ -56,7 +56,7 @@ class PropertyController {
 
   Future<Result> updateProperty() async {
     if (propertyFormData.coverPhototData != null) {
-      propertyFormData.coverPhoto = await uploadFile(propertyFormData.coverPhototData!, 'coverPhoto');
+      propertyFormData.coverPhoto = await uploadFile(propertyFormData.coverPhototData!, 'coverPhoto${propertyFormData.propertyID}');
     }
 
     if (propertyFormData.photosData.isNotEmpty) {

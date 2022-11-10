@@ -14,14 +14,6 @@ class Dashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfff7f9f8),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        centerTitle: true,
-        title: const Text(
-          "DASHBOARD",
-          style: TextStyle(color: Colors.black),
-        ),
-      ),
       body: GetBuilder(
           init: DashboardController(),
           builder: (context) {

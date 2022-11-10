@@ -26,14 +26,14 @@ class _StaffListState extends State<StaffList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: const Text(
-          "STAFFS LIST",
-          style: TextStyle(color: Colors.black),
-        ),
-        centerTitle: true,
-      ),
+      // appBar: AppBar(
+      //   backgroundColor: Colors.white,
+      //   title: const Text(
+      //     "STAFFS LIST",
+      //     style: TextStyle(color: Colors.black),
+      //   ),
+      //   centerTitle: true,
+      // ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.all(56.0),
         child: FloatingActionButton(

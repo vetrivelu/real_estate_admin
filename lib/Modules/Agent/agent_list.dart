@@ -40,14 +40,14 @@ class _AgentListState extends State<AgentList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: const Text(
-          "AGENTS LIST",
-          style: TextStyle(color: Colors.black),
-        ),
-        centerTitle: true,
-      ),
+      // appBar: AppBar(
+      //   backgroundColor: Colors.white,
+      //   title: const Text(
+      //     "AGENTS LIST",
+      //     style: TextStyle(color: Colors.black),
+      //   ),
+      //   centerTitle: true,
+      // ),
       floatingActionButton: (AppSession().staff?.isAdmin ?? false)
           ? Padding(
               padding: const EdgeInsets.all(56.0),
